@@ -30,8 +30,6 @@ Game.dll + 0x66E71E SKILL
 Game.dll + 0x740420 fog
 */
 memedit::PatchInfo p[] = {
-	//fps
-	{0x3A49AC,2,"\x90\x90",nullptr},
 	//MainMap
 	{0x1BFEE5,1,"\xEB",nullptr},
 	//{0x1BFF01,1,"\xEB",nullptr},
@@ -42,7 +40,7 @@ memedit::PatchInfo p[] = {
 		3BDC35 special icon for heroes
 	*/
 	{0x3BDBED,1,"\xE7",nullptr},
-	{0x3BD7E5,2,"\x33\xC0",nullptr},
+	//{0x3BD7E5,2,"\x33\xC0",nullptr},
 	/*
 	{0x329B30,3,"\x33\xC0\xC3",nullptr},
 	{0x335620,1,"\x00",nullptr},
@@ -52,30 +50,34 @@ memedit::PatchInfo p[] = {
 	{0x6516A3,1,"\xEB",nullptr},
 	//Click item
 	{0x1C0144,1,"\xEB",nullptr},
-	//Show Missile
-	{0x36F670,2,"\x90\x90",nullptr},
 	//Items
 	{0x1C0053,1,"\xEB",nullptr},
-	//{0x1C006F,1,"\xEB",nullptr},
-	//{0x232089,2,"\x90\x90",nullptr},
 	//ping
 	{0x251274,1,"\xFC",nullptr},
 	{0x251287,1,"\xFC",nullptr},
 	//Illusions
 	{0x66E457,2,"\x40\xC3",nullptr},
-	//SKILL IN COMMAND SECTION
 	{0x5E20D1,1,"\xCC",nullptr},
 	{0x47EE5E,1,"\x8C",nullptr},
 	{0x66E71E,1,"\xEB",nullptr},
 	{0x392818,2,"\x90\x90",nullptr},
 	{0x392858,2,"\x90\x90",nullptr},
-	//Show skill effects
-	//{0x366B2B,2,"\x90\x90",nullptr},
-	//{0x366B52,1,"\xEB",nullptr},
 	//Resource Trade
 	{0x3A5835,6,"\xB8\xC8\x00\x00\x00\x90",nullptr},
 	{0x3A583D,6,"\xB8\xC8\x00\x00\x00\x90",nullptr},
 	{0x3AAA23,2,"\x90\x90",nullptr},
+	//Rescource View
+	{0x3BEC40,2,"\x90\x90",nullptr},
+	{0x3B0E33,2,"\x90\x90",nullptr},
+	{0x3B1593,2,"\x90\x90",nullptr},
+	{0x3B3993,2,"\x90\x90",nullptr},
+	{0x67A599,2,"\x90\x90",nullptr},
+	{0x3AAA17,1,"\xEB",nullptr},
+#ifndef LIMITED
+	//fps
+	{0x3A49AC,2,"\x90\x90",nullptr},
+	//Show Missile
+	{0x36F670,2,"\x90\x90",nullptr},
 	//Select Circle
 	/*
 		select		+73dddc
@@ -86,13 +88,7 @@ memedit::PatchInfo p[] = {
 	{0x26FA82,2,"\xEB\x02",nullptr},
 	{0x26FA92,2,"\xEB\x02",nullptr},
 	{0x67A450,12,"\x8B\x4D\x18\xE8\x48\xC2\xCA\xFF\x90\x90\x90\x90",nullptr},
-	//Rescource View
-	{0x3BEC40,2,"\x90\x90",nullptr},
-	{0x3B0E33,2,"\x90\x90",nullptr},
-	{0x3B1593,2,"\x90\x90",nullptr},
-	{0x3B3993,2,"\x90\x90",nullptr},
-	{0x67A599,2,"\x90\x90",nullptr},
-	{0x3AAA17,1,"\xEB",nullptr}
+#endif
 };
 const unsigned int numberOfPatch = sizeof(p) / sizeof(memedit::PatchInfo);
 static const char* MsFormat = "%.1f";
@@ -130,14 +126,13 @@ void memedit::applyDetour()
 	sometable = gameDll + 0xBE40A8;
 	colorUnit = gameDll + 0x186FC0;
 	colorInvisiblesCallJumpBack = gameDll + 0x635FA0;
-
 	PlantDetourCall((BYTE*)gameDll + 0x38D59A, (BYTE*)showMoveSpeed, 5);
 	PlantDetourCall((BYTE*)gameDll + 0x38C83A, (BYTE*)showAttackSpeed, 5);
 	PlantDetourCall((BYTE*)gameDll + 0x3BBD02, (BYTE*)getHpRegen, 6);
 	PlantDetourCall((BYTE*)gameDll + 0x3BBE98, (BYTE*)getMpRegen, 6);
 	PlantDetourCall((BYTE*)gameDll + 0x3B7DDC, (BYTE*)hookShowHeroStatus, 6);
-	PlantDetourCall((BYTE*)gameDll + 0x3BD5B4, (BYTE*)hpBarHook, 5);
 	PlantDetourCall((BYTE*)gameDll + 0x3709C8, (BYTE*)colorInvisibles, 5);
+	PlantDetourCall((BYTE*)gameDll + 0x3BD5B4, (BYTE*)hpBarHook, 5);
 	VM_TIGER_WHITE_END
 }
 

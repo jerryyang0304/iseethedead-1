@@ -1,3 +1,7 @@
+/*
+	无法精确的找到大地图转换小地图的方法
+	暂时（永久）停用
+*/
 #include "pch.h"
 #include "miniMapHack.h"
 
@@ -21,11 +25,11 @@ uint32_t MiniMapHack::CoordToMinimap(float Loc, DWORD offst)
 #define ADDR(X,REG)\
 	__asm MOV REG,DWORD PTR DS:[X] \
 	__asm MOV REG,DWORD PTR DS:[REG]
-
+	//+88BE3F
 	DWORD _W3XConversion, addrConvertCoord1, addrConvertCoord2;
 	uint32_t result = 0;
 	float Result = 0;
-	_W3XConversion = gameDll + 0xbb82bc;
+	_W3XConversion = gameDll + 0xBB82BC;
 	addrConvertCoord1 = gameDll + 0x528B0;
 	addrConvertCoord2 = gameDll + 0x52F30;
 	//'game.dll' + 2F71C + 305A9
@@ -34,39 +38,61 @@ uint32_t MiniMapHack::CoordToMinimap(float Loc, DWORD offst)
 		ADDR(_W3XConversion, EAX)
 		add EAX, dword ptr[offst]
 		PUSH EAX
-		LEA EDX, Loc
-		LEA ECX, Result
+		LEA EDX, Loc	//edx == p -> float
+		LEA ECX, Result	//ecx == p -> dword
 		CALL addrConvertCoord1
-		MOV EAX, dword ptr Result
-		LEA ECX, [EAX - 0x3000000]
-		XOR ECX, EAX
-		LEA EDX, DWORD PTR DS : [EAX - 0x2800000]
-		SAR ECX, 0x1F
-		NOT ECX
-		AND ECX, EDX
-		MOV dword ptr Result, ECX
-		LEA ECX, Result
+		MOV ECX,DWORD PTR DS:[EAX]
+		LEA EAX,DWORD PTR DS:[ECX+0xFD000000]
+		XOR EAX,ECX
+		SAR EAX,0x1F
+		LEA EDX,DWORD PTR DS:[ECX+0xFD800000]
+		NOT EAX
+		AND EAX,EDX
+		LEA ECX,Result
+		MOV DWORD PTR DS:[ECX],EAX
 		CALL addrConvertCoord2
 		MOV result, EAX
 	}
+	logger->info("{} Loc {} result {}", offst, Loc, result);
 	return result;
 }
 
-inline void MiniMapHack::ConvertMmap(MmapLoc& loc)
+void MiniMapHack::ConvertMmap(MmapLoc& loc)
 {
-	int X, Y;
-	float fX = loc.X / 4, fY = loc.Y / 4;
-	fX -= minX;
-	fY -= minY;
+	uint32_t addrW3Minimap = gameDll + 0xBE6DC4;
+	uint32_t base = *(uint32_t*)(addrW3Minimap);
+	maxX = *(int*)(base + 0x224);
+	minX = *(int*)(base + 0x228);
+	minY = *(int*)(base + 0x22C);
+	maxY = *(int*)(base + 0x230);
+	xMult = *(float*)(base + 0x21c);
+	yMult = *(float*)(base + 0x220);
+	unk = *(float*)(gameDll + 0x961898);
+	unk2 = *(uint32_t*)(base + 0x214);
+	unk3 = *(uint32_t*)(base + 0x218);
+	int X = loc.X / 4, Y = loc.Y / 4;
+	X = max(X, minX); X = min(X, maxX);
+	Y = max(Y, minY); Y = min(Y, maxY);
+	X -= minX; Y -= minY;
+	float fX = X, fY = Y;
 	fX = fX * xMult + unk;
 	fY = fY * yMult + unk;
-	X = *(unsigned int*)(&fX) >> 0xe;
-	Y = *(unsigned int*)(&fY) >> 0xe;
-	X += (unk2 - const2);
-	Y = 0x100 - Y - unk3 - const2;
-
+	__asm
+	{
+		MOV EAX, fX
+		SHR EAX, 0xE
+		MOVZX EAX, AL
+		MOV X, EAX
+		MOV EAX, fY
+		SHR EAX, 0xE
+		MOVZX EAX, AL
+		MOV Y, EAX
+	};
+	X += unk2 - 2;
+	Y = 0x100 - Y - unk3 - 2;
+	logger->info("Loc {},{} result {} {}", loc.X, loc.Y, X, Y);
 	loc.X = X;
-	loc.Y = Y; 
+	loc.Y = Y;
 }
 
 MmapLoc MiniMapHack::LocationToMinimap(float x, float y)
@@ -74,7 +100,13 @@ MmapLoc MiniMapHack::LocationToMinimap(float x, float y)
 	MmapLoc ret;
 	ret.X = CoordToMinimap(x, 0x6C);
 	ret.Y = CoordToMinimap(y, 0x70);
+	//logger->info("ret0 {},{}", ret.X, ret.Y);
 	ConvertMmap(ret);
+	//logger->info("ret1 {},{}", ret.X, ret.Y);
+	//Loc test{ x,y };
+	//Loc testret{ x,y };
+	//CalMiniMapLoc(test, testret);
+	//logger->info("testret {},{}", testret.x, testret.y);
 	return ret;
 }
 
@@ -111,11 +143,19 @@ void MiniMapHack::draw_unit(void* unit, Unit& obj)
 
 void MiniMapHack::DrawPixel(int x, int y, uint32_t color)
 {
-	x &= 0xff;
-	y &= 0xff;
+	size_t index = 0;
+	__asm
+	{
+
+		MOV EAX, y
+		SHL EAX, 8
+		MOV ECX, x
+		ADD EAX, ECX
+		MOV index, EAX
+	}
 	int offset = (y << 8) + x;
-	restore[offset] = true;
-	gameMiniMap[offset] = color;
+	restore[index] = true;
+	gameMiniMap[index] = color;
 }
 
 void MiniMapHack::addLine(void* unit, float x, float y, unsigned int color) {
@@ -161,15 +201,6 @@ void MiniMapHack::Refresh()
 	uint32_t addrW3Minimap = gameDll + 0xBE6DC4;
 	uint32_t base = *(uint32_t*)(addrW3Minimap);
 	if (base) {
-		maxX = *(int*)(base + 0x224);
-		minX = *(int*)(base + 0x228);
-		minY = *(int*)(base + 0x22C);
-		maxY = *(int*)(base + 0x230);
-		xMult = *(float*)(base + 0x21c);
-		yMult = *(float*)(base + 0x220);
-		unk = *(float*)(gameDll + 0x961898);
-		unk2 = *(uint32_t*)(base + 0x214);
-		unk3 = *(uint32_t*)(base + 0x218);
 		{
 			uint32_t eax, ebx, ecx, edx;
 			ebx = base;
@@ -188,6 +219,30 @@ void MiniMapHack::Refresh()
 			}
 		}
 	}
+}
+
+void MiniMapHack::CalMiniMapLoc(const Loc& main, Loc& mini) {
+	//uint32_t W3Minimap = *(uint32_t*)(gameDll + 0xBE6DC4) + 0x750;
+	//void* addrMainMapLoc2MiniMapLoc = (void *)(gameDll + 0xD0C20);
+	//void* pmini = &mini;
+	//void* pmain = &main;
+
+	//_asm {
+	//	push W3Minimap
+	//	mov ecx, pmini
+	//	mov edx, pmain
+	//	call addrMainMapLoc2MiniMapLoc
+	//}
+	const int CAMERABOUNDFIX = 1024;
+
+	float WorldMinX = jass::GetCameraBoundMinX().fl - CAMERABOUNDFIX;
+	float WorldMaxX = jass::GetCameraBoundMaxX().fl + CAMERABOUNDFIX;
+	float WorldMinY = jass::GetCameraBoundMinY().fl - CAMERABOUNDFIX;
+	float WorldMaxY = jass::GetCameraBoundMaxY().fl + CAMERABOUNDFIX;
+	float WorldSizeX = WorldMaxX - WorldMinX;
+	float WorldSizeY = WorldMaxY - WorldMinY;
+	mini.x = 255 * (main.x - WorldMinX) / WorldSizeX;
+	mini.y = 255 - 255 * (main.y - WorldMinY) / WorldSizeY;
 }
 
 void MiniMapHack::DrawMiniMap()

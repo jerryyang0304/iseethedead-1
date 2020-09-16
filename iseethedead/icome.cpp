@@ -9,14 +9,12 @@
 #include "safeclick.h"
 #include <random>
 
-MiniMapHack* aMiniMapHack = new MiniMapHack();
+//MiniMapHack* aMiniMapHack = new MiniMapHack();
 HANDLE DrawMiniMapThread = 0;
 unsigned int timerNO;
 gamePlayerInfo* aPlayerInfo = new gamePlayerInfo();
-void traverseUnits();
 
-inline void updateTag() {
-	VM_TIGER_WHITE_START
+inline void icome::updateTag() {
 	static long long time = 0;
 	time++;
 	for (auto it = unitTrack::allunits.begin(); it != unitTrack::allunits.end();) {
@@ -31,36 +29,43 @@ inline void updateTag() {
 			unitTrack::allunits.erase(it++);
 		}
 	}
-	VM_TIGER_WHITE_END
 }
 static bool firstBoot = true;
 
-void firstBOOT() {
-	DisplayText("|cFFffff33v0.2 author \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r", 60.0f);
-	DisplayText("|cFFffff33We are being watched|r", 60.0f);
-	DisplayText("|cFFffff33    - in memory of the machine and samaritan|r", 60.0f);
-	firstBoot = false;
-	traverseUnits();
+bool icome::firstBOOT() {
+	if (PostChatMessage("|cFFffff33[Author] \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r") &&
+		PostChatMessage("|cFFffff33[In memory of] the machine and samaritan|r") &&
+		PostChatMessage("|cFFffff33[We] are being watched|r")) {
+		DisplayChatMessage("|cFFffff33[Author] \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r");
+		DisplayChatMessage("|cFFffff33[In memory of] the machine and samaritan|r");
+		DisplayChatMessage("|cFFffff33[We] are being watched|r");
+		firstBoot = false;
+		traverseUnits();
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
-void miniMapHotKeys(DWORD dwTime) {
-	static DWORD lastToggleCount = 0;
-	static DWORD exitCode1;
-	if (GetAsyncKeyState(VK_HOME) && (dwTime - lastToggleCount) > 200) {
-		GetExitCodeThread(DrawMiniMapThread, &exitCode1);
-		if (exitCode1 != STILL_ACTIVE) {
-			CloseHandle(DrawMiniMapThread);
-			DrawMiniMapThread = CreateThread(NULL, NULL, icome::DrawMiniMap, NULL, NULL, NULL);
-		}
-		lastToggleCount = dwTime;
-	}
-	GetExitCodeThread(DrawMiniMapThread, &exitCode1);
-	if (DrawMiniMapThread != 0 && exitCode1 != STILL_ACTIVE) {
-		DisplayText("|cFFffff33MiniMap Drawer has crashed|r", 18.0f);
-		CloseHandle(DrawMiniMapThread);
-		DrawMiniMapThread = 0;
-	}
-}
+//void icome::miniMapHotKeys(DWORD dwTime) {
+//	static DWORD lastToggleCount = 0;
+//	static DWORD exitCode1;
+//	if (GetAsyncKeyState(VK_HOME) && (dwTime - lastToggleCount) > 200) {
+//		GetExitCodeThread(DrawMiniMapThread, &exitCode1);
+//		if (exitCode1 != STILL_ACTIVE) {
+//			CloseHandle(DrawMiniMapThread);
+//			DrawMiniMapThread = CreateThread(NULL, NULL, icome::DrawMiniMap, NULL, NULL, NULL);
+//		}
+//		lastToggleCount = dwTime;
+//	}
+//	GetExitCodeThread(DrawMiniMapThread, &exitCode1);
+//	if (DrawMiniMapThread != 0 && exitCode1 != STILL_ACTIVE) {
+//		DisplayText("|cFFffff33MiniMap Drawer has crashed|r", 18.0f);
+//		CloseHandle(DrawMiniMapThread);
+//		DrawMiniMapThread = 0;
+//	}
+//}
 
 void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) {
 	static DWORD lastTime = 0;
@@ -68,21 +73,24 @@ void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		if (IsInGame()) {
 			aPlayerInfo->fresh();
-			if (firstBoot) firstBOOT();
+			if (firstBoot) {
+				firstBOOT(); 
+				return;
+			}
 			unitTrack::processUnitCreationEvent();
 			updateTag();
 			if (dwTime - 10000 >= lastTime) {
 				logger->flush();
 				lastTime = dwTime;
 			}
-			miniMapHotKeys(dwTime);
+			//miniMapHotKeys(dwTime);
 		}
 		else {
 			if (firstBoot == false) {
 				firstBoot = true;
 				unitTrack::allunits.clear();
 				unitTrack::onUnitGenQueue.clear();
-				aMiniMapHack->Clear();
+				//aMiniMapHack->Clear();
 			}
 		}
 	}
@@ -96,7 +104,6 @@ void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
 void icome::icome()
 {
-	VM_TIGER_WHITE_START
 	unsigned int allowLocalFile = gameDll + 0x21080;
 	_asm {
 		push ecx
@@ -105,18 +112,19 @@ void icome::icome()
 		pop ecx
 	}
 	jass::init();
-	memedit::applyDetour();
 	memedit::applyPatch();
-	//safeClick::init();
 	mhDetect::init();
+#ifndef LIMITED
+	memedit::applyDetour();
+	safeClick::init();
+#endif
 	unitTrack::hook();
 	std::mt19937 g(GetTickCount());
 	while (!SetTimer(hWnd, g(), 100, (TIMERPROC)timer));
 	logger->info("My prey is near.");
-	VM_TIGER_WHITE_END
 }
 
-inline void traverseUnits() {
+void icome::traverseUnits() {
 	VM_TIGER_WHITE_START
 	unitTrack::allunits.clear();
 	unitTrack::onUnitGenQueue.clear();
@@ -135,28 +143,28 @@ inline void traverseUnits() {
 
 #include "unitTracker.h"
 
-DWORD WINAPI icome::DrawMiniMap(LPVOID para) {
-	__try
-	{
-		logger->info("icome::DrawMiniMap started");
-		if (IsInGame()) {
-			aMiniMapHack->Clear();
-			while (true) {
-				if (IsInGame()) {
-					aMiniMapHack->DrawMiniMap(); 
-					Sleep(150);
-				}
-				else {
-					break;
-				}
-			}
-		}
-		logger->info("icome::DrawMiniMap returned normally");
-		return 0;
-	}
-	__except (filter(GetExceptionCode(), GetExceptionInformation()))
-	{
-		logger->error("icome::DrawMiniMap crashed");
-		return 0;
-	}
-}
+//DWORD WINAPI icome::DrawMiniMap(LPVOID para) {
+//	__try
+//	{
+//		logger->info("icome::DrawMiniMap started");
+//		if (IsInGame()) {
+//			aMiniMapHack->Clear();
+//			while (true) {
+//				if (IsInGame()) {
+//					aMiniMapHack->DrawMiniMap(); 
+//					Sleep(150);
+//				}
+//				else {
+//					break;
+//				}
+//			}
+//		}
+//		logger->info("icome::DrawMiniMap returned normally");
+//		return 0;
+//	}
+//	__except (filter(GetExceptionCode(), GetExceptionInformation()))
+//	{
+//		logger->error("icome::DrawMiniMap crashed");
+//		return 0;
+//	}
+//}

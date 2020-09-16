@@ -84,9 +84,6 @@ void __fastcall mhDetect::HookOnDispatchUnitSelectionModify(UnitSelectionModify*
 {
 	__try {
 		aOnDispatchUnitSelectionModify(command);
-#ifdef LIMITED
-		if (command->playerNumber == PlayerLocal()) return;
-#endif
 		if (command->type == 1) {
 			for (unsigned int i = 0; i < command->unitCount[0]; i++) {
 				testSelection(command->selectedUnits[i].ObjectID1, command->selectedUnits[i].ObjectID2, command);
@@ -163,24 +160,24 @@ void __fastcall mhDetect::HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned 
 #ifndef LIMITED
 		unsigned int eventOwner = jass::Player(d->playerId);
 		void* targetObject = jass::GetUnitThroughId(d->targetObject.ObjectID1, d->targetObject.ObjectID2);
-		if(FilterOrderId(d->orderId))	DetectImpossibleOrder(d, targetObject, eventOwner);
+		if (FilterOrderId(d->orderId))	DetectImpossibleOrder(d, targetObject, eventOwner);
 #endif // !LIMITED
-		switch (d->orderId)
-		{
-			//case STOP:
-			//case HOLD:
-			//	aMiniMapHack->DelObject(triggerUnit);
-			//	break;
-		case SMART:
-		case MOVE:
-		case ATTACK:
-		case PATROL:
-			aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
-			break;
-		default:
-			aMiniMapHack->delLine(triggerUnit);
-			break;
-		}
+		//switch (d->orderId)
+		//{
+		//	//case STOP:
+		//	//case HOLD:
+		//	//	aMiniMapHack->DelObject(triggerUnit);
+		//	//	break;
+		//case SMART:
+		//case MOVE:
+		//case ATTACK:
+		//case PATROL:
+		//	aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
+		//	break;
+		//default:
+		//	aMiniMapHack->delLine(triggerUnit);
+		//	break;
+		//}
 		aOnPlayerOrder(triggerUnit, d, dwZero1, dwZero2);
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {
@@ -197,10 +194,10 @@ void mhDetect::init()
 	if (error == NO_ERROR)
 	{
 		DetourUpdateThread(GetCurrentThread());
-		DetourAttach(&(PVOID&)aOnDispatchUnitSelectionModify, HookOnDispatchUnitSelectionModify);
 #ifndef LIMITED
+		DetourAttach(&(PVOID&)aOnDispatchUnitSelectionModify, HookOnDispatchUnitSelectionModify);
 		DetourAttach(&(PVOID&)aOnDispatchSelectableSelectionModify, HookOnDispatchSelectableSelectionModify);
-#endif
+#endif // !LIMITED
 		DetourAttach(&(PVOID&)aOnPlayerOrder, HookOnPlayerOrder);
 		DetourTransactionCommit();
 	}	

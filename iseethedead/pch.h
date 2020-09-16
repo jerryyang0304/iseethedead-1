@@ -9,11 +9,7 @@
 #pragma comment(lib,"detours.lib")
 #define VM_TIGER_WHITE_START ;
 #define VM_TIGER_WHITE_END ;
-#define LIMITED
-#include "ThemidaSDK.h"
-#include "SecureEngineCustomVMs.h"
-#include "VirtualizerSDK.h"
-#include "VirtualizerSDK_CustomVMs.h"
+//#define LIMITED
 #include "spdlog/sinks/basic_file_sink.h"
 extern std::shared_ptr<spdlog::logger> logger;
 extern unsigned int gameDll;

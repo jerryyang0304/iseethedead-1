@@ -40,7 +40,6 @@ bool IsGameObjectPresent()
 
 unsigned int ObjectToHandle(void* pObj) {
 	if (!pObj) return 0;
-	VM_TIGER_WHITE_START
 	unsigned int result;
 	unsigned int GameGlobalObject = gameDll + 0xBE4238;
 	unsigned int GameHandleFromObject = gameDll + 0x2651D0;
@@ -55,12 +54,10 @@ unsigned int ObjectToHandle(void* pObj) {
 		call GameHandleFromObject
 		mov result, eax
 	}
-	VM_TIGER_WHITE_END
 	return result;
 };
 
 void PlantDetourCall(BYTE* bSource, BYTE* bDestination, size_t iLength) {
-	VM_TIGER_WHITE_START
 	DWORD dwOldProtection = NULL;
 	VirtualProtect(bSource, iLength, PAGE_EXECUTE_READWRITE, &dwOldProtection);
 	bSource[0] = 0xE8;
@@ -68,7 +65,6 @@ void PlantDetourCall(BYTE* bSource, BYTE* bDestination, size_t iLength) {
 	for (size_t i = 5; i < iLength; i++)
 		bSource[i] = 0x90;
 	VirtualProtect(bSource, iLength, dwOldProtection, NULL);
-	VM_TIGER_WHITE_END
 }
 
 bool IsInGame()
@@ -85,7 +81,6 @@ bool IsInGame()
 }
 
 void DisplayText(const char* szText, float fDuration) {
-	VM_TIGER_WHITE_START
 	if (IsInGame())
 	{
 		void* GameGlobalUI = (void*)(0xBE6350 + gameDll);
@@ -101,7 +96,6 @@ void DisplayText(const char* szText, float fDuration) {
 			CALL	EAX;
 		}
 	}
-	VM_TIGER_WHITE_END
 };
 
 static char ConvertOrderIdBuff[64];
@@ -269,4 +263,42 @@ void HideLDRTable(HMODULE module)
 		}
 		p = *((DWORD**)p);
 	} while (Flink != p);
+}
+
+void DisplayChatMessage(const char* msg, float duration, unsigned int PlayerSlot, unsigned int chattype) {
+	unsigned int GameGlobalUI = *(unsigned int*)(0xBE6350 + gameDll);
+	void* DisplayPlayerChatMessageCall = (void*)(0x355CF0 + gameDll);
+	if (GameGlobalUI) {
+		_asm {
+			PUSH duration
+			PUSH chattype
+			PUSH msg
+			PUSH PlayerSlot
+			MOV ECX, GameGlobalUI
+			CALL DisplayPlayerChatMessageCall
+		}
+	}	
+}
+
+bool PostChatMessage(const char* msg, float duration, unsigned int PlayerSlot, unsigned int chattype) {
+	unsigned int hischatUI = 0, GameGlobalUI = *(unsigned int*)(0xBE6350 + gameDll);
+	void* PostPlayerChatMessageCall = (void*)(0x38D030 + gameDll);
+	if (GameGlobalUI) {
+		hischatUI = *(unsigned int*)((unsigned int)GameGlobalUI + 0x23c);
+		if (hischatUI) { 
+			hischatUI = *(unsigned int*)((unsigned int)hischatUI + 0xc);
+			if (hischatUI) {
+				_asm {
+					PUSH duration
+					PUSH chattype
+					PUSH msg
+					PUSH PlayerSlot
+					MOV ECX, hischatUI
+					CALL PostPlayerChatMessageCall
+				}
+				return true;
+			}
+		}
+	}
+	return false;
 }

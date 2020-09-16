@@ -20,6 +20,12 @@ struct MmapLoc
 	int X, Y;
 };
 
+struct Loc
+{
+	float x, y;
+	float unk = 1.0;
+};
+
 class MiniMapHack final {
 private:
 	std::unordered_map<void*, UnitLine> lines;
@@ -33,13 +39,14 @@ private:
 	int minX, minY, maxX, maxY;
 
 	MmapLoc LocationToMinimap(float x, float y);
-	void DrawPixel(int x, int y, uint32_t color);
 	void draw_line(void* unit, UnitLine& obj);
 	uint32_t CoordToMinimap(float Loc, DWORD offst);
 	void draw_line(int x0, int y0, int x1, int y1, uint32_t c);
 	void draw_unit(void*, Unit&);
+	void DrawPixel(int x, int y, uint32_t color);
 	void ConvertMmap(MmapLoc& loc);
 	void Refresh();
+	void CalMiniMapLoc(const Loc& main, Loc& mini);
 	void Clean();
 	void RestorMiniMap();
 public:

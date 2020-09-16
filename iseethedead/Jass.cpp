@@ -45,6 +45,10 @@ namespace jass {
 	pGetAddrByHandle		GetAddrByHandle;
 	pGetUnitFacing			GetUnitFacing;
 	pGetUnitByIDs			GetUnitByIDs;
+	pGetCameraBoundMinX	GetCameraBoundMinX;
+	pGetCameraBoundMinY	GetCameraBoundMinY;
+	pGetCameraBoundMaxX	GetCameraBoundMaxX;
+	pGetCameraBoundMaxY	GetCameraBoundMaxY;
 	static unsigned int addrUnitName1, addrUnitName2;
 	static unsigned int addrItemName1, addrItemName2;
 	static unsigned int addrGetPlayerName1, addrGetPlayerName2;
@@ -102,6 +106,11 @@ namespace jass {
 		GetPlayerAlliance = (pGetPlayerAlliance)(gameDll + 0x1E3C50);
 		GetUnitFacing = (pGetUnitFacing)(gameDll + 0x1E6130);
 		GetUnitByIDs = (pGetUnitByIDs)(gameDll + 0x37350);
+
+		GetCameraBoundMinX = (pGetCameraBoundMinX)(gameDll + 0x1E1870);
+		GetCameraBoundMinY = (pGetCameraBoundMinY)(gameDll + 0x1E18A0);
+		GetCameraBoundMaxX = (pGetCameraBoundMaxX)(gameDll + 0x1E1810);
+		GetCameraBoundMaxY = (pGetCameraBoundMaxY)(gameDll + 0x1E1840);
 		VM_TIGER_WHITE_END
 	}
 	char* GetUnitName(unsigned int hUnit)

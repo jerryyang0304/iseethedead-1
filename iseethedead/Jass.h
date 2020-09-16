@@ -149,6 +149,18 @@ namespace jass {
 	typedef char* (__cdecl* pGetObjectName)(unsigned int hObject);
 	extern pGetObjectName	GetObjectName;
 
+	typedef Float(__cdecl* pGetCameraBoundMinX)();
+	extern pGetCameraBoundMinX	GetCameraBoundMinX;
+
+	typedef Float(__cdecl* pGetCameraBoundMaxX)();
+	extern pGetCameraBoundMaxX	GetCameraBoundMaxX;
+
+	typedef Float(__cdecl* pGetCameraBoundMinY)();
+	extern pGetCameraBoundMinY	GetCameraBoundMinY;
+
+	typedef Float(__cdecl* pGetCameraBoundMaxY)();
+	extern pGetCameraBoundMaxY	GetCameraBoundMaxY;
+
 #define RACE_HUMAN		1
 #define RACE_ORC		2
 #define RACE_UNDEAD		3

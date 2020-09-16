@@ -1,0 +1,268 @@
+不得不说是DOTA外挂开始让我我学习编程的。
+
+以前的VS HF从互通图， 到全图，到自动补刀，到自动躲技能，主机T人，外挂无处不在。
+以前早上六点跑到网吧只为了进VS的高级房间（苦逼屌丝买不起VS的VIP）。现在VS HF空空如也的房间怕是早就没人了吧。
+
+现在DOTA平台应该也就只有11还能看得下去吧，下面直接开撸，最后的是压轴的
+下面说的绘图都是基于你已经知道如何获取英雄的坐标了，（最后可能会有如何取得英雄单位的代码）。
+
+1 GDI
+readprocessmemory读取魔兽的内存，GDI画到游戏上
+由于魔兽独占模式。GDI画上去会闪烁。效果非常差。当然可以采取窗口化魔兽，然后去掉边框，绘图像歌词软件那样做。总之效果不好，但是被平台发现的可能性几乎为0，总之不推荐。
+
+2 D3D 绘图
+HOOK D3d的present或者endscene?大概是这几个函数绘图，应该是我绘图技术不好，总觉得画起来挺难看的。 平台对这里可能会有检测。而且坐标的转换有些麻烦。
+
+前面说的都是放屁，完全啥都没教。
+
+下面的说的魔兽版本1.24E，game.dll基址默认6f000000。
+
+3  在魔兽内部绘制。
+魔兽的小地图其实是一个255*255的DWORD二维数组
+有两块内存区域。一块是原始的地图信息数据pOrg保存着原始的信息，用于恢复，一块是绘图用于显示给用户看的pPaint
+过程是从porg复制到ppaint中，根据当前的游戏信息在ppaint上修改数据，然后显示给用户。完成后再复制porg到ppaint中，如此循环。
+复制porg到ppaint的函数地址开头
+6F362CD0    55                       PUSH EBP
+开始复制
+6F362D5D    0F6F06                   MOVQ MM0,QWORD PTR DS:[ESI]
+6F362D60    0F6F4E 08                MOVQ MM1,QWORD PTR DS:[ESI+8]
+6F362D64    0F6F56 10                MOVQ MM2,QWORD PTR DS:[ESI+10]
+6F362D68    0F6F5E 18                MOVQ MM3,QWORD PTR DS:[ESI+18]
+6F362D6C    0F6F66 20                MOVQ MM4,QWORD PTR DS:[ESI+20]
+6F362D70    0F6F6E 28                MOVQ MM5,QWORD PTR DS:[ESI+28]
+6F362D74    0F6F76 30                MOVQ MM6,QWORD PTR DS:[ESI+30]
+6F362D78    0F6F7E 38                MOVQ MM7,QWORD PTR DS:[ESI+38]
+6F362D7C    0F7F07                   MOVQ QWORD PTR DS:[EDI],MM0
+6F362D7F    0F7F4F 08                MOVQ QWORD PTR DS:[EDI+8],MM1
+6F362D83    0F7F57 10                MOVQ QWORD PTR DS:[EDI+10],MM2
+6F362D87    0F7F5F 18                MOVQ QWORD PTR DS:[EDI+18],MM3
+6F362D8B    0F7F67 20                MOVQ QWORD PTR DS:[EDI+20],MM4
+6F362D8F    0F7F6F 28                MOVQ QWORD PTR DS:[EDI+28],MM5
+6F362D93    0F7F77 30                MOVQ QWORD PTR DS:[EDI+30],MM6
+6F362D97    0F7F7F 38                MOVQ QWORD PTR DS:[EDI+38],MM7
+
+255*255的DWORD数组。每一个DWORD数据就是一个颜色。比如0XFFAABBCC 表示alpha通道值为0XFF R=0XAA G=0XBB B=0XCC 也就是通道值+RGB （有可能是BGR，应该是BGR，如果我没记错的话）
+
+地址如下
+TEMPV=[Game.dll+0xACD06C];
+[TEMPV+0X1D8]  为小地图像素的起始点 ppaint
+[ [TEMPV+0X17C] ]  为小地图像素的复制点 porg
+
+当我们取得单位的坐标后。选择一个合适的地方HOOK 就可以修改像素点画图了。
+比如我要在小地图的第一个像素点画一个红色，那么就是ppaint[0][0]=0xffff0000;(BGR 就是0xff0000ff)；
+
+如果你是修改ppaint，记得要在porg复制到ppaint以后，但是还没有展现给用户之前修改。如果是直接修改porg那就随意了，但是记得要保存一份porg的副本，否则你自己也没法恢复。
+关键是找到一个合适的HOOK点，这部分常常要和dx的DLL打交道。多跟踪很容易找到合适的HOOK点，但是还是画不出原来的感觉。
+
+4压轴的，也是我推荐的。直接使用调用魔兽的某些东西，让他自己画。
+由于代码过去很久了，现在要我拿起OD找到具体位置我也懒得找了，直接上代码，照着记忆来说
+
+//位置结构。x,y不多说，unknown是3F800000。浮点数1.0？？
+struct Pos
+{
+    DWORD x,y,unknow;
+};
+ 
+ 
+//由于但是是写成shellcode的，所以封装了函数
+ 
+//storm.dll的地址
+DWORD _declspec(noinline) GetStromAddr()
+{
+    return 0x15000000;
+}
+//game.dll的地址
+DWORD _declspec(noinline)GetGameAddr()
+{
+    return 0x6f000000;
+}
+ 
+//只要在某些地方HOOK，调用这个函数就可以小地图上画出英雄单位
+void AllDraw()
+{
+    DWORD HeroPoint,HeroNext;
+    HeroPoint=GetHeroAddrPFunc();//获取英雄单位链表。（我称他为链表~~<img src="/view/img/face/12.gif" style="cursor: pointer;" width="24" height="24">）
+    if (HeroPoint==0)
+    {
+        return ;
+    }
+    HeroNext=*(DWORD*)HeroPoint;//取出第一个单位的地址
+    while (HeroNext!=0)
+    {
+ 
+        BYTE Dead=0;
+        Dead=*(BYTE*)(HeroNext+0x20);//死了自然不用画
+        if(Dead==0x46)
+        {
+                        //没死就画
+            MainDraw(HeroNext);
+        }
+ 
+        HeroPoint+=0x18;//链表自增
+        HeroNext=*(DWORD*)HeroPoint;//取出下一个单位地址。直到为0表示没有了
+    }
+}
+ 
+ 
+ 
+ 
+//大地图坐标转小地图坐标的call 本来是有参数的。这里naked就不写了
+void  _declspec(naked) FloatCall()
+{
+    _asm
+    {
+        push ebp
+        mov ebp,esp
+        pushad
+        pushfd
+        mov edx,[ebp+0xc]
+        mov ecx,[ebp+0x10]
+        push DWORD PTR SS:[ebp+8]
+        push eax
+        PUSH ESI
+        MOV ESI,DWORD PTR SS:[ESP+0x8]
+        FLD DWORD PTR DS:[ESI+0xC]
+        MOV EAX,ECX
+        FMUL DWORD PTR DS:[EDX+4]
+        FLD DWORD PTR DS:[EDX]
+        FMUL DWORD PTR DS:[ESI]
+        FADDP ST(1),ST
+        FLD DWORD PTR DS:[ESI+0x18]
+        FMUL DWORD PTR DS:[EDX+0x8]
+        FADDP ST(1),ST
+        FSTP DWORD PTR DS:[EAX]
+        FLD DWORD PTR DS:[ESI+0x4]
+        FMUL DWORD PTR DS:[EDX]
+        FLD DWORD PTR DS:[ESI+0x10]
+        FMUL DWORD PTR DS:[EDX+4]
+        FADDP ST(1),ST
+        FLD DWORD PTR DS:[ESI+0x1C]
+        FMUL DWORD PTR DS:[EDX+8]
+        FADDP ST(1),ST
+        FSTP DWORD PTR DS:[EAX+4]
+        FLD DWORD PTR DS:[ESI+8]
+        FMUL DWORD PTR DS:[EDX]
+        FLD DWORD PTR DS:[ESI+0x14]
+        FMUL DWORD PTR DS:[EDX+4]
+        FADDP ST(1),ST
+        FLD DWORD PTR DS:[ESI+0x20]
+        POP ESI
+        FMUL DWORD PTR DS:[EDX+8]
+        FADDP ST(1),ST
+        FSTP DWORD PTR DS:[EAX+8]
+        pop eax
+        add esp,4
+        popfd
+        popad
+        mov esp,ebp
+        pop ebp
+        retn
+    }
+};
+ 
+ 
+//这个确实不记得了
+DWORD  GetHeroLC(DWORD HeroAddr)
+{
+    return *(DWORD*)(HeroAddr+0x58);
+}
+ 
+//获取坐标地址。填充需要的结构
+void  GetHeroLocData(DWORD HeroAddr,Pos * p)
+{
+ 
+    p->x=*(DWORD*)(HeroAddr+0x284);
+    p->y=*(DWORD*)(HeroAddr+0x288);
+    p->unknow=0x3f800000;//浮点1.0
+}
+ 
+void  MainDraw(DWORD HeroAddr)
+{
+    Pos pReal;
+    Pos pChange;
+    DWORD lc=GetHeroLC(HeroAddr);
+ 
+      //获取大地图坐标
+    GetHeroLocData(HeroAddr,&pReal);
+ 
+    DWORD Gaddr=GetGameAddr();
+ 
+ 
+//把大地图 转到 小地图结构
+    DWORD MiniVal=*(DWORD*)(Gaddr+0xACD06C);
+    LPVOID p1=&pChange;
+    LPVOID p2=&pReal;
+    DWORD p3=MiniVal+0x750;
+    _asm mov esp,esp
+    _asm
+    {
+        pushad
+        push p1
+        push p2
+        push p3
+        call FloatCall
+        add esp,0xc
+        popad
+    }
+ 
+ 
+/*这里记得了，上面的GetHeroLC是用于计算玩家楼层。有一个标记。
+所有的英雄单位还有一个数组，1表示要画图，0表示不要画图。*/
+ 
+ 
+ 
+//想起来了,LC=楼层。
+ 
+    //FloatCall(MiniVal+0x750,&pReal,&pChange);
+    DWORD StartAddr=*(DWORD*)(MiniVal+0x2e4);
+ 
+//StartAddr就是这个数组的地址
+ 
+    DWORD TempCount=*(DWORD*)(StartAddr+lc*4);
+    if (TempCount!=0)//如果数组里面显示要画了，那我们没必要多此一举
+    {
+        return ;
+    }
+ 
+    DWORD Judge=*(DWORD*)(MiniVal+0x2f0);
+    Judge=*(DWORD*)(lc*4+Judge);
+    if (Judge==0)//这里还有个判断，不记得是干嘛的了。
+    {
+        return ;
+    }
+ 
+//把数组里面的值标记为1，表示要画出来
+    *(DWORD*)(StartAddr+lc*4)=TempCount+1;
+ 
+//把这个结构放到一个位置，让魔兽画出来。
+    lc=lc<<4;
+    DWORD CopyAddr=*(DWORD*)(lc+MiniVal+0x2fc);
+    DWORD Offset=TempCount*3;
+    CopyAddr+=Offset*4;
+    ((Pos*)CopyAddr)->x=pChange.x;
+    ((Pos*)CopyAddr)->y=pChange.y;
+    ((Pos*)CopyAddr)->unknow=pChange.unknow;
+}
+ 
+ 
+ 
+//获取英雄表头
+DWORD  GetHeroAddrPFunc()
+{
+    DWORD HeroAddrPoint=0;
+    DWORD Addr=0x55514+GetStromAddr();
+    memcpy(&HeroAddrPoint,(LPCVOID)(Addr),4);
+ 
+    if(*(DWORD*)(HeroAddrPoint+0x88)!=0x18)
+        return 0;
+ 
+    HeroAddrPoint=HeroAddrPoint+0x98;
+    //特别注意，这里返回值可能为0；
+    return HeroAddrPoint;
+}
+
+总之就是只要在合适的地方填写好game.dll storm.dll的基址，调用
+alldraw就可以了。
+
+这个过过11还是没有任何压力的。。。难者不会。会者不难。说到这里，做一个自己用的小地图应该还是没啥压力的。
+只是为某些想做小地图的人省去了OD调试找偏移的麻烦 
