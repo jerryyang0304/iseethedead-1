@@ -32,6 +32,7 @@ Game.dll + 0x740420 fog
 memedit::PatchInfo p[] = {
 	//MainMap
 	{0x1BFEE5,1,"\xEB",nullptr},
+	//{0x3709F8,3,"\xFE\xC0\x90",nullptr},
 	//{0x1BFF01,1,"\xEB",nullptr},
 	//Invisible
 	{0x370AD3,1,"\xEB",nullptr},
@@ -39,8 +40,10 @@ memedit::PatchInfo p[] = {
 	/*
 		3BDC35 special icon for heroes
 	*/
-	{0x3BDBED,1,"\xE7",nullptr},
-	//{0x3BD7E5,2,"\x33\xC0",nullptr},
+	//{0x3BDBED,1,"\xE7",nullptr},
+	{0x3BD7E5,2,"\x33\xC0",nullptr},
+	//3BDBBD units 3BDC0A bulidings
+	//
 	/*
 	{0x329B30,3,"\x33\xC0\xC3",nullptr},
 	{0x335620,1,"\x00",nullptr},
@@ -109,18 +112,15 @@ void memedit::Patch(void* dwBaseAddress, const char* szData, size_t iSize)
 
 void memedit::applyPatch()
 {
-	VM_TIGER_WHITE_START
 	for (unsigned int i = 0; i < numberOfPatch; i++) {
 		p[i].backup = std::make_unique<char[]>(p[i].size);
 		memcpy_s(p[i].backup.get(), p[i].size, (void*)(p[i].addr + gameDll), p[i].size);
 		Patch((void*)(p[i].addr + gameDll), p[i].content, p[i].size);
 	}
-	VM_TIGER_WHITE_END
 }
 
 void memedit::applyDetour()
 {
-	VM_TIGER_WHITE_START
 	storm503 = gameDll + 0x12063A;
 	storm578 = gameDll + 0x1205D4;
 	sometable = gameDll + 0xBE40A8;
@@ -133,7 +133,6 @@ void memedit::applyDetour()
 	PlantDetourCall((BYTE*)gameDll + 0x3B7DDC, (BYTE*)hookShowHeroStatus, 6);
 	PlantDetourCall((BYTE*)gameDll + 0x3709C8, (BYTE*)colorInvisibles, 5);
 	PlantDetourCall((BYTE*)gameDll + 0x3BD5B4, (BYTE*)hpBarHook, 5);
-	VM_TIGER_WHITE_END
 }
 
 void memedit::rollBack()
@@ -146,7 +145,6 @@ void memedit::rollBack()
 
 void __declspec(naked) memedit::showMoveSpeed()
 {
-	VM_TIGER_WHITE_START;
 	_asm
 	{
 		FLD  DWORD PTR SS : [ESP + 0x78]
@@ -161,12 +159,10 @@ void __declspec(naked) memedit::showMoveSpeed()
 		POPAD
 		JMP	DWORD PTR DS : [storm503]
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::showAttackSpeed()
 {
-	VM_TIGER_WHITE_START;
 	_asm
 	{
 		FLD  DWORD PTR SS : [ESP + 0x78]
@@ -181,12 +177,10 @@ void __declspec(naked) memedit::showAttackSpeed()
 		POPAD
 		JMP	DWORD PTR DS : [storm503]
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::getHpRegen()
 {
-	VM_TIGER_WHITE_START;
 	_asm {
 		lea eax, ss: [ebp - 0xD8]
 		push eax
@@ -207,12 +201,10 @@ void __declspec(naked) memedit::getHpRegen()
 
 		ret
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::getMpRegen()
 {
-	VM_TIGER_WHITE_START;
 	_asm {
 		add ecx, 0xB8
 		push eax
@@ -232,12 +224,10 @@ void __declspec(naked) memedit::getMpRegen()
 		pop  eax
 		ret
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::hookShowHeroStatus()
 {
-	VM_TIGER_WHITE_START;
 	_asm {
 		push ecx
 		lea  ecx, [ebp - 0x44]
@@ -258,12 +248,10 @@ void __declspec(naked) memedit::hookShowHeroStatus()
 		mov  esi, dword ptr ds : [ebx + 0x134]
 		retn
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::hpBarHook()
 {
-	VM_TIGER_WHITE_START;
 	__asm
 	{
 		PUSH ECX
@@ -309,12 +297,10 @@ void __declspec(naked) memedit::hpBarHook()
 			call dword ptr ds : [eax + 0x24]
 			ret 0x4
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void __declspec(naked) memedit::colorInvisibles()
 {
-	VM_TIGER_WHITE_START;
 	__asm
 	{
 		push eax
@@ -349,6 +335,5 @@ void __declspec(naked) memedit::colorInvisibles()
 				pop eax
 			jmp dword ptr ds : [colorInvisiblesCallJumpBack]
 	}
-	VM_TIGER_WHITE_END;
 }
 

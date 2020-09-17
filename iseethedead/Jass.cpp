@@ -54,7 +54,6 @@ namespace jass {
 	static unsigned int addrGetPlayerName1, addrGetPlayerName2;
 	static const char* nullString = "(null)";
 	void init() {
-		VM_TIGER_WHITE_START
 		GetAddrByHandle = (pGetAddrByHandle)(gameDll + 0x1D1550);
 		addrUnitName1 = (gameDll + 0x1D1550);
 		addrUnitName2 = (gameDll + 0x326BA0);
@@ -111,7 +110,6 @@ namespace jass {
 		GetCameraBoundMinY = (pGetCameraBoundMinY)(gameDll + 0x1E18A0);
 		GetCameraBoundMaxX = (pGetCameraBoundMaxX)(gameDll + 0x1E1810);
 		GetCameraBoundMaxY = (pGetCameraBoundMaxY)(gameDll + 0x1E1840);
-		VM_TIGER_WHITE_END
 	}
 	char* GetUnitName(unsigned int hUnit)
 	{
@@ -252,12 +250,10 @@ namespace jass {
 
 void* jass::GetUnitThroughId(unsigned int d1, unsigned int d2)
 {
-	VM_TIGER_WHITE_START
 	unsigned int result = jass::GetUnitByIDs(d1, d2);
 	void* ret = nullptr;
 	if (result) { 	// && *(unsigned int*)(result + 0xC) == 0x2B61676C
 		ret = (void*)*(unsigned int*)(result + 0x54);
 	}
-	VM_TIGER_WHITE_END
 	return ret;
 }

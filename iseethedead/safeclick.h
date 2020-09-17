@@ -35,6 +35,14 @@ namespace safeClick {
 		DWORD dwUnitIds[12][2];
 	};
 
+	struct SelectionActionItem_t {
+		BYTE bOpCode;
+		BYTE bMode;
+		WORD id1;
+		WORD unk = 0;
+		WORD id2;
+	};
+
 	typedef bool(__thiscall* CUnit_IsUnitVisible_t)(CUnit*, DWORD, DWORD, DWORD);
 
 	bool __stdcall SendActionHandler(CAction* lpAction);

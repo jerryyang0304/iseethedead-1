@@ -101,6 +101,7 @@ void __fastcall mhDetect::HookOnDispatchSelectableSelectionModify(SelectableSele
 	__try {
 		aOnDispatchSelectableSelectionModify(command);
 		void* aItem = jass::GetUnitThroughId(command->selectedSelectable.ObjectID1, command->selectedSelectable.ObjectID2);
+
 		if (aItem != nullptr) {
 			unsigned int eventOwner = jass::Player(command->playerNumber);
 			unsigned int hItem = ObjectToHandle(aItem);
@@ -162,22 +163,6 @@ void __fastcall mhDetect::HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned 
 		void* targetObject = jass::GetUnitThroughId(d->targetObject.ObjectID1, d->targetObject.ObjectID2);
 		if (FilterOrderId(d->orderId))	DetectImpossibleOrder(d, targetObject, eventOwner);
 #endif // !LIMITED
-		//switch (d->orderId)
-		//{
-		//	//case STOP:
-		//	//case HOLD:
-		//	//	aMiniMapHack->DelObject(triggerUnit);
-		//	//	break;
-		//case SMART:
-		//case MOVE:
-		//case ATTACK:
-		//case PATROL:
-		//	aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
-		//	break;
-		//default:
-		//	aMiniMapHack->delLine(triggerUnit);
-		//	break;
-		//}
 		aOnPlayerOrder(triggerUnit, d, dwZero1, dwZero2);
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {

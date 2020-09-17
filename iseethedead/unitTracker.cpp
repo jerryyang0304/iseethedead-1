@@ -49,7 +49,6 @@ void __fastcall unitTrack::processUnitDestory(unsigned int unit)
 
 extern gamePlayerInfo* aPlayerInfo;
 bool unitTrack::addNewUnit(unsigned int handle, unsigned int object) {
-	VM_TIGER_WHITE_START
 	unsigned int character = 0;
 	if (!jass::IsUnitAlly(handle, jass::GetLocalPlayer())) {
 		character += 4;
@@ -68,7 +67,6 @@ bool unitTrack::addNewUnit(unsigned int handle, unsigned int object) {
 			allunits[handle] = std::make_shared<W3unit>(handle, object, character);
 		}
 	}
-	VM_TIGER_WHITE_END
 	return true;
 }
 

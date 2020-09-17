@@ -10,20 +10,30 @@ bool __stdcall safeClick::SendActionHandler(CAction* lpAction)
 {
 	bool ret = TRUE;
 	__try {
-		VM_TIGER_WHITE_START
-		if (lpAction->GetData()[0] == 0x16) {
-			SelectionAction_t* SelectionAction = (SelectionAction_t*)lpAction->GetData();
-			if (SelectionAction->wCount == 1 && SelectionAction->bMode == 1) {
-				CUnit* aUnit = (CUnit*)jass::GetUnitThroughId(SelectionAction->dwUnitIds[0][0], SelectionAction->dwUnitIds[0][1]);
-				if (aUnit != nullptr && !aUnit->IsVisibleToPlayer(PlayerLocal())) {
-					unsigned int hUnit = ObjectToHandle(aUnit);
-					if (!jass::GetPlayerAlliance(aPlayerInfo->getLocalPlayer(), jass::GetOwningPlayer(hUnit), 5)) {
+		SelectionAction_t* sa = (SelectionAction_t*)lpAction->GetData();
+		SelectionActionItem_t* sai = (SelectionActionItem_t*)lpAction->GetData();
+		if (lpAction->GetData()[0] == 0x16 && sa->wCount == 1 && sa->bMode == 1) {
+			CUnit* unit = (CUnit*)jass::GetUnitThroughId(sa->dwUnitIds[0][0], sa->dwUnitIds[0][1]);
+			if (unit) {
+				unsigned int hUnit = ObjectToHandle(unit);
+				if (!unit->IsVisibleToPlayer(PlayerLocal()) && !jass::GetPlayerAlliance(aPlayerInfo->getLocalPlayer(), jass::GetOwningPlayer(hUnit), 5)) {
+					ret = false;
+				}
+			}
+		}
+		else if (sai->bOpCode == 0x1c && sai->bMode == 0x04) {
+			void* aItem = jass::GetUnitThroughId(sai->id1, sai->id2);
+			if (aItem) {
+				unsigned int hItem = ObjectToHandle(aItem);
+				if (hItem) {
+					float x = jass::GetItemX(hItem).fl;
+					float y = jass::GetItemY(hItem).fl;
+					if (!jass::IsVisibleToPlayer(&x, &y, jass::Player(PlayerLocal()))) {
 						ret = false;
 					}
 				}
 			}
 		}
-		VM_TIGER_WHITE_END
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {
 		logger->warn("safeClick::SendActionHandler crashed");
@@ -33,7 +43,6 @@ bool __stdcall safeClick::SendActionHandler(CAction* lpAction)
 
 void __declspec(naked) safeClick::SendActionHook()
 {
-	VM_TIGER_WHITE_START;
 	__asm
 	{
 		PUSH EBX
@@ -53,18 +62,15 @@ void __declspec(naked) safeClick::SendActionHook()
 			POP EBP
 			RET
 	}
-	VM_TIGER_WHITE_END;
 }
 
 void safeClick::init()
 {
-	VM_TIGER_WHITE_START
 	CUnit_IsUnitVisible = CUnit_IsUnitVisible_t(gameDll + 0x6516E0);
 	UnitArray_v = gameDll + 0xBB9D88;
 	_4EFB0 = gameDll + 0x4EFB0;
 	//{0x30F1C2,safeClick::SendActionHook,5,nullptr}
 	PlantDetourCall((BYTE*)gameDll + 0x30F1C2, (BYTE*)SendActionHook, 5);
-	VM_TIGER_WHITE_END
 }
 
 bool safeClick::CUnit::IsVisibleToPlayer(int nPlayerIndex)
