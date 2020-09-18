@@ -16,22 +16,18 @@ bool __stdcall safeClick::SendActionHandler(CAction* lpAction)
 			CUnit* unit = (CUnit*)jass::GetUnitThroughId(sa->dwUnitIds[0][0], sa->dwUnitIds[0][1]);
 			if (unit) {
 				unsigned int hUnit = ObjectToHandle(unit);
+				//此处需要判断是否有视野的原因是 只有先点击单位才能对其发布命令
+				//如果直接返回false会导致 无法购买物品 无法A S H M 和释放任何技能 如果用来整别人到时行。。。
 				if (!unit->IsVisibleToPlayer(PlayerLocal()) && !jass::GetPlayerAlliance(aPlayerInfo->getLocalPlayer(), jass::GetOwningPlayer(hUnit), 5)) {
 					ret = false;
 				}
 			}
 		}
-		else if (sai->bOpCode == 0x1c && sai->bMode == 0x04) {
+		else if (true) {
 			void* aItem = jass::GetUnitThroughId(sai->id1, sai->id2);
+			//其实完全可以直接不发送物品的点击信息 不会造成不同步且没有副作用
 			if (aItem) {
-				unsigned int hItem = ObjectToHandle(aItem);
-				if (hItem) {
-					float x = jass::GetItemX(hItem).fl;
-					float y = jass::GetItemY(hItem).fl;
-					if (!jass::IsVisibleToPlayer(&x, &y, jass::Player(PlayerLocal()))) {
-						ret = false;
-					}
-				}
+				ret = false;
 			}
 		}
 	}
@@ -47,7 +43,7 @@ void __declspec(naked) safeClick::SendActionHook()
 	{
 		PUSH EBX
 		CALL SendActionHandler
-		TEST eax, eax
+		TEST al, al
 		JZ   dontsend
 		MOV  ECX, 0Dh
 		CALL DWORD PTR DS : [_4EFB0]
