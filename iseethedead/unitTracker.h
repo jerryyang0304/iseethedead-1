@@ -6,8 +6,8 @@ typedef void (__fastcall *UnitDestructor)(unsigned int);
 
 namespace unitTrack {
 	struct UnitCreationEvent {
-		uint64_t tickCount64;
-		unsigned int unitAddr;
+		uint64_t tickCount64 = 0;
+		unsigned int unitAddr = 0;
 		unsigned int visitCount = 0;
 	};
 	extern std::unordered_map<unsigned int, std::shared_ptr<W3unit>> allunits;
@@ -17,5 +17,4 @@ namespace unitTrack {
 	unsigned int processUnitCreate();
 	void __fastcall processUnitDestory(unsigned int unit);
 	void __stdcall processUnitCreationEvent();
-	void printall();
 }

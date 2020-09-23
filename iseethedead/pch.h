@@ -7,8 +7,7 @@
 #ifndef PCH_H
 #define PCH_H
 #pragma comment(lib,"detours.lib")
-#define VM_TIGER_WHITE_START ;
-#define VM_TIGER_WHITE_END ;
+
 //#define LIMITED
 #include "spdlog/sinks/basic_file_sink.h"
 extern std::shared_ptr<spdlog::logger> logger;

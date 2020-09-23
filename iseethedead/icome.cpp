@@ -97,7 +97,8 @@ void icome::icome()
 #endif
 	unitTrack::hook();
 	std::mt19937 g(GetTickCount());
-	while (!SetTimer(hWnd, g(), 100, (TIMERPROC)timer));
+	//5fps is enough
+	while (!SetTimer(hWnd, g(), 200, (TIMERPROC)timer));
 	logger->info("My prey is near.");
 }
 

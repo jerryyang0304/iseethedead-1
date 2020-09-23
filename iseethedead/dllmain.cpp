@@ -1,5 +1,4 @@
-﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
-#include "pch.h"
+﻿#include "pch.h"
 #include "icome.h"
 #include <iostream>
 
@@ -20,7 +19,6 @@ BOOL APIENTRY DllMain(HMODULE hModule,
 	case DLL_PROCESS_ATTACH:
 	{
 		hIsee = (unsigned int)hModule;
-		//获取魔兽版本信息
 		if (WarcraftVersion() == 52240) {
 			DisableThreadLibraryCalls(hModule);
 			HideLDRTable(hModule);

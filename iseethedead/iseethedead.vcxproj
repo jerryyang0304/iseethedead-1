@@ -38,6 +38,7 @@
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -171,28 +172,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BaseStructs.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="GameStructs.h" />
     <ClInclude Include="icome.h" />
     <ClInclude Include="Jass.h" />
     <ClInclude Include="jassString.h" />
     <ClInclude Include="memedit.h" />
     <ClInclude Include="mhDetect.h" />
-    <ClInclude Include="miniMapHack.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="safeclick.h" />
-    <ClInclude Include="StealthDataArea.h" />
-    <ClInclude Include="StringStructs.h" />
-    <ClInclude Include="StructHelper.h" />
-    <ClInclude Include="TextTagManager.h" />
-    <ClInclude Include="TextTagManagerStructs.h" />
     <ClInclude Include="tools.h" />
-    <ClInclude Include="UIStructs.h" />
     <ClInclude Include="unit.h" />
     <ClInclude Include="unitTracker.h" />
-    <ClInclude Include="VMPLicense.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
@@ -201,7 +192,6 @@
     <ClCompile Include="jassString.cpp" />
     <ClCompile Include="memedit.cpp" />
     <ClCompile Include="mhDetect.cpp" />
-    <ClCompile Include="miniMapHack.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

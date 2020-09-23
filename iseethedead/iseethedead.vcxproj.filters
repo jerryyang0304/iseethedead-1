@@ -42,43 +42,13 @@
     <ClInclude Include="player.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="GameStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StringStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="UIStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="BaseStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="TextTagManagerStructs.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StructHelper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="mhDetect.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="miniMapHack.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="safeclick.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="TextTagManager.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="jassString.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="VMPLicense.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="StealthDataArea.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -111,9 +81,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="mhDetect.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="miniMapHack.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="safeclick.cpp">

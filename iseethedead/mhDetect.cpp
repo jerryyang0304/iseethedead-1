@@ -31,16 +31,7 @@ void mhDetect::testSelection(unsigned int objId1, unsigned int objId2, UnitSelec
 			if (jass::GetPlayerAlliance(eventOwner, hOwner, ALLIANCE_SHARED_VISION)) return;
 			bool unitVisible = jass::IsUnitVisible(hUnit, eventOwner);
 
-			if (unitVisible) {
-				/*if (jass::IsPlayerEnemy(hOwner, eventOwner)) {
-					_snprintf_s(buff, _TRUNCATE, "%s%s|r |cff00FF00->|r %s%s %s|r",
-						GetPlayerColorString(command->playerNumber), jass::GetPlayerName(eventOwner),
-						GetPlayerColorString(jass::GetPlayerColor(hOwner)), jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
-					);
-					DisplayText(buff, 7.0f);
-				}*/
-				return;
-			}
+			if (unitVisible) return;
 
 			float unitX = GetUnitX(aUnit);
 			float unitY = GetUnitY(aUnit);
