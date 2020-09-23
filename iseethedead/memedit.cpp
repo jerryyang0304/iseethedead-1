@@ -148,7 +148,6 @@ void __declspec(naked) memedit::showMoveSpeed()
 	_asm
 	{
 		FLD  DWORD PTR SS : [ESP + 0x78]
-		PUSHAD
 		SUB  ESP, 8
 		FSTP QWORD PTR SS : [ESP]
 		PUSH MsFormat
@@ -156,7 +155,6 @@ void __declspec(naked) memedit::showMoveSpeed()
 		PUSH EAX
 		CALL DWORD PTR DS : [storm578]
 		ADD  ESP, 0x14
-		POPAD
 		JMP	DWORD PTR DS : [storm503]
 	}
 }
@@ -166,7 +164,6 @@ void __declspec(naked) memedit::showAttackSpeed()
 	_asm
 	{
 		FLD  DWORD PTR SS : [ESP + 0x78]
-		PUSHAD
 		SUB  ESP, 8
 		FSTP QWORD PTR SS : [ESP]
 		PUSH AsFormat
@@ -174,7 +171,6 @@ void __declspec(naked) memedit::showAttackSpeed()
 		PUSH EAX
 		CALL DWORD PTR DS : [storm578]
 		ADD  ESP, 0x14
-		POPAD
 		JMP	DWORD PTR DS : [storm503]
 	}
 }
@@ -185,20 +181,15 @@ void __declspec(naked) memedit::getHpRegen()
 		lea eax, ss: [ebp - 0xD8]
 		push eax
 		push ecx
-		push esi
-
 		mov  ecx, dword ptr ds : [ecx + 0xa0]
-		mov  esi, [sometable]
-		mov  esi, [esi]
-		mov  eax, dword ptr ds : [esi + 0x0c]
+		mov  eax, [sometable]
+		mov  eax, [eax]
+		mov  eax, dword ptr ds : [eax + 0x0c]
 		mov  ecx, dword ptr ds : [ecx * 8 + eax + 4]
 		mov  ecx, dword ptr ds : [ecx + 0x7c]
 		mov  hpRegen, ecx
-
-		pop  esi
 		pop  ecx
 		pop  eax
-
 		ret
 	}
 }
@@ -209,17 +200,13 @@ void __declspec(naked) memedit::getMpRegen()
 		add ecx, 0xB8
 		push eax
 		push ecx
-		push esi
-
 		mov  ecx, dword ptr ds : [ecx + 8]
-		mov  esi, [sometable]
-		mov  esi, [esi]
-		mov  eax, dword ptr ds : [esi + 0x0c]
+		mov  eax, [sometable]
+		mov  eax, [eax]
+		mov  eax, dword ptr ds : [eax + 0x0c]
 		mov  ecx, dword ptr ds : [ecx * 8 + eax + 4]
 		mov  ecx, dword ptr ds : [ecx + 0x7c]
 		mov  mpRegen, ecx
-
-		pop  esi
 		pop  ecx
 		pop  eax
 		ret
@@ -233,7 +220,6 @@ void __declspec(naked) memedit::hookShowHeroStatus()
 		lea  ecx, [ebp - 0x44]
 		fld  mpRegen
 		fld  hpRegen
-		pushad
 		sub  esp, 0x10
 		fstp qword ptr ss : [esp]
 		fstp qword ptr ss : [esp + 8]
@@ -243,7 +229,6 @@ void __declspec(naked) memedit::hookShowHeroStatus()
 		push ecx
 		CALL DWORD PTR DS : [storm578]
 		add  esp, 0x20
-		popad
 		pop  ecx
 		mov  esi, dword ptr ds : [ebx + 0x134]
 		retn
@@ -265,37 +250,26 @@ void __declspec(naked) memedit::hpBarHook()
 		MOV  EAX, DWORD PTR DS : [EAX + 0xFC]
 		MOV  ECX, EDI							//this call
 		CALL EAX
-		CMP  EAX, 1
+		CMP  AL, 1
 		POP ECX
-
 		JE   next								//visible
-			mov	 edx, dword ptr ss : [esp + 0x4]
-			mov  dword ptr ds : [edx] , 0xFFC7C7C7
+		mov	 edx, dword ptr ss : [esp + 0x4]
+		mov  dword ptr ds : [edx] , 0xFFC7C7C7
 		jmp  epilogue
-
-		next :
-		/*push ecx
-		push edi
-		call W3unit::IsUnitDetected
-		test eax,eax
-		pop ecx
-		je finish
-			mov	 edx, dword ptr ss : [esp + 0x4]
-			mov  dword ptr ds : [edx] , 0xff00BFFF
-		jmp  epilogue*/
+	next :
 		mov edx, dword ptr ss : [esp + 0x4]
-			epilogue :
-			movzx eax, byte ptr ds : [edx + 0x3]
-			mov byte ptr ds : [ecx + 0x68] , al
-			movzx eax, byte ptr ds : [edx + 0x2]
-			mov byte ptr ds : [ecx + 0x6B] , al
-			movzx eax, byte ptr ds : [edx + 0x1]
-			mov byte ptr ds : [ecx + 0x6A] , al
-			movzx eax, byte ptr ds : [edx]
-			mov byte ptr ds : [ecx + 0x69] , al
-			mov eax, dword ptr ds : [ecx]
-			call dword ptr ds : [eax + 0x24]
-			ret 0x4
+	epilogue :
+		movzx eax, byte ptr ds : [edx + 0x3]
+		mov byte ptr ds : [ecx + 0x68] , al
+		movzx eax, byte ptr ds : [edx + 0x2]
+		mov byte ptr ds : [ecx + 0x6B] , al
+		movzx eax, byte ptr ds : [edx + 0x1]
+		mov byte ptr ds : [ecx + 0x6A] , al
+		movzx eax, byte ptr ds : [edx]
+		mov byte ptr ds : [ecx + 0x69] , al
+		mov eax, dword ptr ds : [ecx]
+		call dword ptr ds : [eax + 0x24]
+		ret 0x4
 	}
 }
 
@@ -304,36 +278,21 @@ void __declspec(naked) memedit::colorInvisibles()
 	__asm
 	{
 		push eax
-		push ebx
-		push ecx
-		push edx
 		MOV  AL, BYTE PTR DS : [EBX + 0x5F]
 		CMP  AL, 1
 		JNZ  Finish
+		push ecx
+		push edx
 		PUSH EBX
-		MOV  DWORD PTR DS : [ESP] , 0xFFFF3030
+		MOV  DWORD PTR DS : [ESP] , 0xFFFF0000
 		MOV  ECX, DWORD PTR DS : [EBX + 0x28]
 		XOR  EDX, EDX
 		call dword ptr ds : [colorUnit]
-		//Visible :
-		//	MOV AL, BYTE PTR DS : [EBX + 0x248]
-		//	AND AL, 0x4
-		//	TEST AL, AL
-		//	JZ Finish
-		//	PUSH EBX
-		//	MOV  DWORD PTR DS : [ESP] , 0xFF0000EE
-		//	MOV  ECX, DWORD PTR DS : [EBX + 0x28]
-		//	XOR  EDX, EDX
-		//	mov  eax, DWORD PTR DS : [dwGameDll]
-		//	lea  eax, [eax + 0x186FC0]
-		//	//colorUnit
-		//	call eax
+		pop edx
+		pop ecx
 	Finish:
-			pop edx
-				pop ecx
-				pop ebx
-				pop eax
-			jmp dword ptr ds : [colorInvisiblesCallJumpBack]
+		pop eax
+		jmp dword ptr ds : [colorInvisiblesCallJumpBack]
 	}
 }
 
