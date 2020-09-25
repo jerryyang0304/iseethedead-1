@@ -23,12 +23,8 @@ bool __stdcall safeClick::SendActionHandler(CAction* lpAction)
 				}
 			}
 		}
-		else if (true) {
-			void* aItem = jass::GetUnitThroughId(sai->id1, sai->id2);
-			//其实完全可以直接不发送物品的点击信息 不会造成不同步且没有副作用
-			if (aItem) {
-				ret = false;
-			}
+		else if (sai->bOpCode == 0x1c && sai->bMode == 0x04) {
+			ret = false;
 		}
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {

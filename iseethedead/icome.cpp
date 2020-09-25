@@ -46,8 +46,19 @@ bool icome::firstBOOT() {
 	}
 }
 
+void icome::ToggleMaphack(bool enable) {
+	if (enable == false) {
+		memedit::rollBack();
+	}
+	else {
+		memedit::applyPatch();
+	}
+}
+
 void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) {
-	static DWORD lastTime = 0;
+	static DWORD lastLogTime = 0;
+	static DWORD lastToggleTime = 0;
+	static bool hackEnabled = true;
 	__try
 	{
 		if (IsInGame()) {
@@ -58,9 +69,14 @@ void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 			}
 			unitTrack::processUnitCreationEvent();
 			updateTag();
-			if (dwTime - 10000 >= lastTime) {
+			if (dwTime - 10000 >= lastLogTime) {
 				logger->flush();
-				lastTime = dwTime;
+				lastLogTime = dwTime;
+			}
+			if (GetAsyncKeyState(VK_HOME) && dwTime - lastToggleTime > 1000) {
+				hackEnabled = !hackEnabled;
+				ToggleMaphack(hackEnabled);
+				lastToggleTime = dwTime;
 			}
 		}
 		else {

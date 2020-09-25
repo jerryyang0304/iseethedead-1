@@ -39,7 +39,7 @@ namespace safeClick {
 		BYTE bOpCode;
 		BYTE bMode;
 		WORD id1;
-		WORD unk = 0;
+		WORD gap;
 		WORD id2;
 	};
 

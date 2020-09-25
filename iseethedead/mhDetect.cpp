@@ -92,7 +92,6 @@ void __fastcall mhDetect::HookOnDispatchSelectableSelectionModify(SelectableSele
 	__try {
 		aOnDispatchSelectableSelectionModify(command);
 		void* aItem = jass::GetUnitThroughId(command->selectedSelectable.ObjectID1, command->selectedSelectable.ObjectID2);
-
 		if (aItem != nullptr) {
 			unsigned int eventOwner = jass::Player(command->playerNumber);
 			unsigned int hItem = ObjectToHandle(aItem);

@@ -104,6 +104,7 @@ static unsigned int colorUnit, colorInvisiblesCallJumpBack;
 
 void memedit::Patch(void* dwBaseAddress, const char* szData, size_t iSize)
 {
+	if (szData == nullptr) return;
 	DWORD dwOldProtection = NULL;
 	VirtualProtect((LPVOID)dwBaseAddress, iSize, PAGE_EXECUTE_READWRITE, &dwOldProtection);
 	memcpy_s(dwBaseAddress, iSize, szData, iSize);
@@ -116,6 +117,13 @@ void memedit::applyPatch()
 		p[i].backup = std::make_unique<char[]>(p[i].size);
 		memcpy_s(p[i].backup.get(), p[i].size, (void*)(p[i].addr + gameDll), p[i].size);
 		Patch((void*)(p[i].addr + gameDll), p[i].content, p[i].size);
+	}
+}
+
+void memedit::rollBack() {
+	for (unsigned int i = 0; i < numberOfPatch; i++) {
+		Patch((void*)(p[i].addr + gameDll), p[i].backup.get(), p[i].size);
+		p[i].backup = nullptr;
 	}
 }
 
@@ -133,14 +141,6 @@ void memedit::applyDetour()
 	PlantDetourCall((BYTE*)gameDll + 0x3B7DDC, (BYTE*)hookShowHeroStatus, 6);
 	PlantDetourCall((BYTE*)gameDll + 0x3709C8, (BYTE*)colorInvisibles, 5);
 	PlantDetourCall((BYTE*)gameDll + 0x3BD5B4, (BYTE*)hpBarHook, 5);
-}
-
-void memedit::rollBack()
-{
-	for (unsigned int i = 0; i < numberOfPatch; i++) {
-		Patch((void*)(p[i].addr + gameDll), p[i].backup.get(), p[i].size);
-		p[i].backup = nullptr;
-	}
 }
 
 void __declspec(naked) memedit::showMoveSpeed()
