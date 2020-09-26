@@ -185,6 +185,7 @@ namespace jass {
 	char* GetPlayerName(unsigned int hPlayer);
 	unsigned int GetPlayerBySlot(int slot);
 	void* GetUnitThroughId(unsigned int d1, unsigned int d2);
+	__declspec(noinline) int GetRandomInt(int min, int max);
 	char* GetUnitNameAddr(unsigned int Unit);
 	void ChangeTexttagText(unsigned int tag, CJassString* str);
 }

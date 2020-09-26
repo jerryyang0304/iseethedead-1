@@ -67,6 +67,12 @@ void CALLBACK icome::timer(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 				firstBOOT(); 
 				return;
 			}
+			/*char buff[128];
+			int ans = jass::GetRandomInt(1, 7);
+			_snprintf_s(buff, _TRUNCATE, "%d",
+				ans
+			);
+			DisplayText(buff);*/
 			unitTrack::processUnitCreationEvent();
 			updateTag();
 			if (dwTime - 10000 >= lastLogTime) {

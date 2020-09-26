@@ -91,6 +91,14 @@ memedit::PatchInfo p[] = {
 	{0x26FA82,2,"\xEB\x02",nullptr},
 	{0x26FA92,2,"\xEB\x02",nullptr},
 	{0x67A450,12,"\x8B\x4D\x18\xE8\x48\xC2\xCA\xFF\x90\x90\x90\x90",nullptr},
+	//patch issuetargetOrder
+	//{0x1E96A0,3,"\x33\xc0\xc3",nullptr},
+	//UnitRemoveItem
+	//{0x1FB170,3,"\x33\xc0\xc3",nullptr},
+	//IssueTargetOrderById
+	//{0x1E96C0,3,"\x33\xc0\xc3",nullptr},
+	//IssueNeutralImmediateOrder
+	//{0x1E9080,3,"\x33\xc0\xc3",nullptr},
 #endif
 };
 const unsigned int numberOfPatch = sizeof(p) / sizeof(memedit::PatchInfo);

@@ -257,3 +257,29 @@ void* jass::GetUnitThroughId(unsigned int d1, unsigned int d2)
 	}
 	return ret;
 }
+
+int jass::GetRandomInt(int min, int max) {
+	int ans = 0;
+	if (min > max) return min;
+	else {
+		int len = 1 + max - min;
+		unsigned int* pseed = (unsigned int*)(gameDll + 0xBC5FB0);
+		pseed = (unsigned int*)*pseed;
+		unsigned int addrRandInt = (gameDll + 0x199400);
+		unsigned int seed[2];
+		seed[0] = *(pseed); seed[1] = *(pseed + 1);
+		pseed = &seed[0];
+		_asm {
+			push esi
+			mov edi, min
+			mov esi, len
+			mov ecx, pseed
+			call addrRandInt
+			mul esi
+			pop esi
+			lea eax, dword ptr ds:[edi + edx]
+			mov ans, eax
+		}
+		return ans;
+	}
+}
