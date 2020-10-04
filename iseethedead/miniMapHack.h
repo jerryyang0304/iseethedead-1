@@ -8,6 +8,7 @@
 struct UnitLine {
 	uint32_t unitHandle;
 	int x, y;
+	float fx, fy;
 	unsigned int color;
 };
 
@@ -32,12 +33,11 @@ private:
 	std::unordered_map<void*, Unit> units;
 	std::unordered_map<int, bool> restore;
 	const int const2 = 2;
-	uint32_t* miniMapBackup;
-	uint32_t* gameMiniMap;
-	float xMult, yMult, unk;
-	int unk2, unk3;
-	int minX, minY, maxX, maxY;
-
+	uint32_t* miniMapBackup = nullptr;
+	uint32_t* gameMiniMap = nullptr;
+	float xMult = 0, yMult = 0, unk = 0;
+	int unk2 = 0, unk3 = 0;
+	int minX = 0, minY = 0, maxX = 0, maxY = 0;
 	MmapLoc LocationToMinimap(float x, float y);
 	void draw_line(void* unit, UnitLine& obj);
 	uint32_t CoordToMinimap(float Loc, DWORD offst);
@@ -49,7 +49,12 @@ private:
 	void CalMiniMapLoc(const Loc& main, Loc& mini);
 	void Clean();
 	void RestorMiniMap();
+	static signed int* ConvertCoord1(signed int* a1, signed int* a2, DWORD* a3);
+	static uint32_t ConvertCoord2(int*);
+	static void DetourUpdateMiniMap();
 public:
+	typedef void(__fastcall* convert1)(float*, float*, uint32_t);
+	typedef uint32_t(__fastcall* convert2)(int*);
 	MiniMapHack();
 	~MiniMapHack();
 	void addLine(void* unit, float x, float y, unsigned int color);

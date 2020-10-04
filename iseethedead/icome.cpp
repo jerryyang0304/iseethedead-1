@@ -11,14 +11,13 @@
 HANDLE DrawMiniMapThread = 0;
 unsigned int timerNO;
 gamePlayerInfo* aPlayerInfo = new gamePlayerInfo();
-
+MiniMapHack* aMiniMapHack;
 inline void icome::updateTag() {
 	static long long time = 0;
 	time++;
 	for (auto it = unitTrack::allunits.begin(); it != unitTrack::allunits.end();) {
 		auto unitobject = jass::GetAddrByHandle(it->second->getHandle());
 		if (unitobject) {
-			//logger->info("refreshing unit {0:x} {1:x}", it->first, unitobject);
 			it->second->refreshTag();
 			if (time % 7 == 0) it->second->minimapIndicate();
 			it++;
@@ -111,6 +110,7 @@ void icome::icome()
 		pop ecx
 	}
 	jass::init();
+	aMiniMapHack = new MiniMapHack();
 	memedit::applyPatch();
 #ifndef LIMITED
 	memedit::applyDetour();
@@ -118,7 +118,7 @@ void icome::icome()
 	safeClick::init();
 #endif
 	unitTrack::hook();
-	std::mt19937 g(GetTickCount());
+	std::mt19937 g(GetTickCount64());
 	//5fps is enough
 	while (!SetTimer(hWnd, g(), 200, (TIMERPROC)timer));
 	logger->info("My prey is near.");

@@ -154,6 +154,18 @@ void __fastcall mhDetect::HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned 
 		if (FilterOrderId(d->orderId))	DetectImpossibleOrder(d, targetObject, eventOwner);
 #endif // !LIMITED
 		aOnPlayerOrder(triggerUnit, d, dwZero1, dwZero2);
+		switch (d->orderId)
+		{
+			case SMART:
+			case MOVE:
+			case ATTACK:
+			case PATROL:
+				aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
+				break;
+			default:
+				aMiniMapHack->delLine(triggerUnit);
+				break;
+			}
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {
 		logger->warn("mhDetect::HookOnPlayerOrder crashed");

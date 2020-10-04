@@ -51,6 +51,9 @@
     <ClInclude Include="jassString.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="miniMapHack.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -87,6 +90,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="jassString.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="miniMapHack.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
