@@ -29,5 +29,5 @@ extern HWND hWnd;
 #include "framework.h"
 #include "tools.h"
 #include "Jass.h"
-#include "miniMapHack.h"
+#include "string.h"
 #endif //PCH_H

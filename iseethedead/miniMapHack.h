@@ -7,6 +7,7 @@
 */
 struct UnitLine {
 	uint32_t unitHandle;
+	void* targetUnit = nullptr;
 	int x, y;
 	float fx, fy;
 	unsigned int color;
@@ -58,6 +59,7 @@ public:
 	MiniMapHack();
 	~MiniMapHack();
 	void addLine(void* unit, float x, float y, unsigned int color);
+	void addLine(void* unit, void* targetUnit, unsigned int color);
 	void delLine(void* unit);
 	void addUnit(void* unit, unsigned int cha, unsigned int color);
 	void delUnit(void* unit);

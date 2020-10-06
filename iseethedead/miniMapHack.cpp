@@ -1,6 +1,6 @@
 /*
-	无法精确的找到大地图转换小地图的方法
-	暂时（永久）停用
+	鏃犳硶绮剧‘鐨勬壘鍒板ぇ鍦板浘杞崲灏忓湴鍥剧殑鏂规硶
+	鏆傛椂锛堟案涔咃級鍋滅敤
 
 	+3BD740 updateMiniMap
 */
@@ -229,7 +229,12 @@ void MiniMapHack::DrawPixel(int x, int y, uint32_t color)
 
 void MiniMapHack::addLine(void* unit, float x, float y, unsigned int color) {
 	MmapLoc to = LocationToMinimap(x, y);
-	lines[unit] = UnitLine{ ObjectToHandle(unit), to.X, to.Y, x, y, color };
+	lines[unit] = UnitLine{ ObjectToHandle(unit), nullptr, to.X, to.Y, x, y, color };
+}
+
+void MiniMapHack::addLine(void* unit, void* targetUnit, unsigned int color)
+{
+	lines[unit] = UnitLine{ ObjectToHandle(unit), targetUnit, 0, 0, 0, 0, color };
 }
 
 void MiniMapHack::delLine(void* unit)
@@ -336,9 +341,15 @@ void MiniMapHack::draw_line(void* unit, UnitLine& obj)
 {
 	float ux, uy;
 	ux = GetUnitX(unit), uy = GetUnitY(unit);
-	if (abs(ux- obj.fx) <= 128 && abs(uy - obj.fy) <= 128) return;
 	MmapLoc from = LocationToMinimap(ux, uy);
-	draw_line(from.X, from.Y, obj.x, obj.y, obj.color);
+	if (obj.targetUnit == nullptr) {
+		draw_line(from.X, from.Y, obj.x, obj.y, obj.color);
+	}
+	else {
+		float tx = GetUnitX(obj.targetUnit), ty = GetUnitY(obj.targetUnit);
+		MmapLoc to = LocationToMinimap(tx, ty);
+		draw_line(from.X, from.Y, to.X, to.Y, obj.color);
+	}
 }
 
 void MiniMapHack::RestorMiniMap()
@@ -356,6 +367,7 @@ void MiniMapHack::RestorMiniMap()
 extern MiniMapHack* aMiniMapHack;
 void MiniMapHack::DetourUpdateMiniMap()
 {
+	static bool f = true;
 	__try {
 		_asm {
 			push ebx

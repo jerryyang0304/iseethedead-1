@@ -118,7 +118,7 @@ void icome::icome()
 	safeClick::init();
 #endif
 	unitTrack::hook();
-	std::mt19937 g(GetTickCount64());
+	std::mt19937_64 g(GetTickCount64());
 	//5fps is enough
 	while (!SetTimer(hWnd, g(), 200, (TIMERPROC)timer));
 	logger->info("My prey is near.");

@@ -56,7 +56,7 @@ namespace mhDetect {
 	void __fastcall HookOnDispatchUnitSelectionModify(UnitSelectionModify* command);
 	void __fastcall HookOnDispatchSelectableSelectionModify(SelectableSelectionModify* command);
 
-	void DetectImpossibleOrder(ddd* d, void* targetObject, unsigned int eventOwner);
+	void DetectImpossibleOrder(ddd* d, uint32_t targetObject, unsigned int eventOwner);
 	void __fastcall HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned int dwZero1, unsigned int dwZero2);
 	void init();
 

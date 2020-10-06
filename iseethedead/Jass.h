@@ -75,7 +75,7 @@ namespace jass {
 	typedef Float(__cdecl* pGetItemY)				(unsigned int hUnit);
 	extern pGetItemY	GetItemY;
 
-	typedef void(__cdecl* pPingMinimapEx)			(float* x, float* y, const float* duration, int red, int green, int blue, bool extraEffects);
+	typedef void(__cdecl* pPingMinimapEx)			(const float* x, const float* y, const float* duration, const int red, const int green, const int blue, bool extraEffects);
 	extern pPingMinimapEx	PingMinimapEx;
 
 	typedef void(__cdecl* pUnitAddIndicator)		(unsigned int hUnit, int red, int green, int blue, int alpha);

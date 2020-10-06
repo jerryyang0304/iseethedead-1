@@ -115,13 +115,12 @@ void __fastcall mhDetect::HookOnDispatchSelectableSelectionModify(SelectableSele
 	}
 }
 
-void mhDetect::DetectImpossibleOrder(ddd* d, void* targetObject, unsigned int eventOwner)
+void mhDetect::DetectImpossibleOrder(ddd* d, uint32_t targetObject, unsigned int eventOwner)
 {
 	__try {
 		char* itemName = NULL;
 		char* unitName = NULL;
-		unsigned int h = ObjectToHandle(targetObject);
-		itemName = jass::GetItemName(h);
+		itemName = jass::GetItemName(targetObject);
 
 		if (itemName && !jass::IsVisibleToPlayer(&d->x, &d->y, eventOwner)) {
 			_snprintf_s(buff, _TRUNCATE, "%s%s|r [%s] |cffFF0000->|r %s",
@@ -131,7 +130,7 @@ void mhDetect::DetectImpossibleOrder(ddd* d, void* targetObject, unsigned int ev
 			jass::PingMinimapEx(&d->x, &d->y, &duration, 255, 0, 0, false);
 			logger->info("mhDetect::DetectImpossibleOrder {0} {1} {2} {3}", d->playerId, jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), itemName);
 		}
-		else if (unitName = jass::GetUnitName(h), unitName && !jass::IsUnitVisible(h, eventOwner)) {
+		else if (unitName = jass::GetUnitName(targetObject), unitName && !jass::IsUnitVisible(targetObject, eventOwner)) {
 			_snprintf_s(buff, _TRUNCATE, "%s%s|r [%s] |cffFF0000->|r %s",
 				GetPlayerColorString(d->playerId), jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), unitName
 			);
@@ -145,27 +144,57 @@ void mhDetect::DetectImpossibleOrder(ddd* d, void* targetObject, unsigned int ev
 	}
 }
 
+void ImminentDanger(const void* const triggerUnit, const unsigned int eventOwner, const unsigned int hTargetObject,const ddd* d) {
+	std::string triggerUnitName(jass::GetUnitNameAddr((unsigned int)triggerUnit));
+	if (d->orderId == 0xd0278 && triggerUnitName.find("\xE8\xA3\x82\xE9\xAD\x82\xE4\xBA\xBA") != std::string::npos) {
+		_snprintf_s(buff, _TRUNCATE, "|cffFF0000 %s [\xE6\x9A\x97\xE5\xBD\xB1\xE5\x86\xB2\xE5\x88\xBA] %s|r",
+			jass::GetPlayerName(eventOwner), jass::GetUnitName(hTargetObject)
+		);
+		DisplayText(buff, 18.0f);
+	}
+	else if (d->orderId == 852185 && triggerUnitName.find("\xE5\xB7\xA8\xE7\x89\x99\xE6\xB5\xB7\xE6\xB0\x91") != std::string::npos) {
+		_snprintf_s(buff, _TRUNCATE, "|cffFF0000 %s [\xE9\x9B\xAA\xE7\x90\x83] %s|r",
+			jass::GetPlayerName(eventOwner), jass::GetUnitName(hTargetObject)
+		);
+		DisplayText(buff, 18.0f);
+	}
+}
+
 void __fastcall mhDetect::HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned int dwZero1, unsigned int dwZero2)
 {
 	__try {
-#ifndef LIMITED
-		unsigned int eventOwner = jass::Player(d->playerId);
-		void* targetObject = jass::GetUnitThroughId(d->targetObject.ObjectID1, d->targetObject.ObjectID2);
-		if (FilterOrderId(d->orderId))	DetectImpossibleOrder(d, targetObject, eventOwner);
-#endif // !LIMITED
 		aOnPlayerOrder(triggerUnit, d, dwZero1, dwZero2);
-		switch (d->orderId)
-		{
-			case SMART:
-			case MOVE:
-			case ATTACK:
-			case PATROL:
-				aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
-				break;
-			default:
-				aMiniMapHack->delLine(triggerUnit);
-				break;
+		if (FilterOrderId(d->orderId)) {
+			unsigned int eventOwner = jass::Player(d->playerId);
+			void* targetObject = jass::GetUnitThroughId(d->targetObject.ObjectID1, d->targetObject.ObjectID2);
+			unsigned int hTargetObject = ObjectToHandle(targetObject);
+			uint32_t targetObjectHandle = ObjectToHandle(targetObject);
+			DetectImpossibleOrder(d, targetObjectHandle, eventOwner);
+
+			if (targetObject) {
+				ImminentDanger(triggerUnit, eventOwner, hTargetObject, d);
+				if (jass::GetItemName(hTargetObject)) {
+					aMiniMapHack->addLine(triggerUnit, jass::GetItemX(hTargetObject).fl, jass::GetItemY(hTargetObject).fl, GetPlayerColorHEX(d->playerId));
+				}
+				else {
+					aMiniMapHack->addLine(triggerUnit, targetObject, GetPlayerColorHEX(d->playerId));
+				}
 			}
+			else {
+				switch (d->orderId)
+				{
+				case SMART:
+				case MOVE:
+				case ATTACK:
+				case PATROL:
+					aMiniMapHack->addLine(triggerUnit, d->x, d->y, GetPlayerColorHEX(d->playerId));
+					break;
+				default:
+					aMiniMapHack->delLine(triggerUnit);
+					break;
+				}
+			}
+		}	
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {
 		logger->warn("mhDetect::HookOnPlayerOrder crashed");
