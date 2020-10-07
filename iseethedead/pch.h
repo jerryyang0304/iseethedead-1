@@ -29,5 +29,6 @@ extern HWND hWnd;
 #include "framework.h"
 #include "tools.h"
 #include "Jass.h"
+#include "memedit.h"
 #include "string.h"
 #endif //PCH_H

@@ -140,6 +140,7 @@
       <Optimization>MaxSpeed</Optimization>
       <AdditionalOptions>-O2 %(AdditionalOptions)</AdditionalOptions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <ControlFlowGuard>false</ControlFlowGuard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -148,8 +149,9 @@
       <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <EnableUAC>false</EnableUAC>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <BaseAddress>0x20200000</BaseAddress>
+      <BaseAddress>0x13140000</BaseAddress>
       <GenerateMapFile>true</GenerateMapFile>
+      <SetChecksum>true</SetChecksum>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

@@ -8,7 +8,7 @@ namespace memedit {
 		std::unique_ptr<char[]> backup;
 	};
 	
-	inline void Patch(void* dwBaseAddress, const char* szData, size_t iSize);
+	void Patch(void* dwBaseAddress, const char* szData, size_t iSize);
 	void applyPatch();
 	void applyDetour();
 	void rollBack();

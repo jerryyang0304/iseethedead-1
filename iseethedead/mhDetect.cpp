@@ -30,38 +30,45 @@ void mhDetect::testSelection(unsigned int objId1, unsigned int objId2, UnitSelec
 			unsigned int eventOwner = jass::Player(command->playerNumber);
 			if (jass::GetPlayerAlliance(eventOwner, hOwner, ALLIANCE_SHARED_VISION)) return;
 			bool unitVisible = jass::IsUnitVisible(hUnit, eventOwner);
-
 			if (unitVisible) return;
-
 			float unitX = GetUnitX(aUnit);
 			float unitY = GetUnitY(aUnit);
 			float unitFacing = jass::GetUnitFacing(hUnit).fl * d2r;
-			float ms = jass::GetUnitMoveSpeed(hUnit).fl / 2;      //roughly 0.5s delay
+			float ms = jass::GetUnitMoveSpeed(hUnit).fl / 2;
 			float prevX = unitX - ms * cos(unitFacing);
 			float prevY = unitY - ms * sin(unitFacing);
 			bool prevlocVisible = jass::IsVisibleToPlayer(&prevX, &prevY, eventOwner);
-			bool locVisible = jass::IsVisibleToPlayer(&unitX, &unitY, eventOwner);
 
 			jass::PingMinimapEx(&unitX, &unitY, &duration, 255, 0, 0, true);
 			char* clickType = (char*)"|cffFF0000";
-			if (!locVisible && prevlocVisible) {
+			if (prevlocVisible) {
 				clickType = (char*)"|cffFFFF00";
 			}
 
 			_snprintf_s(buff, _TRUNCATE, "%s%s|r %s->|r %s%s %s|r",
-				GetPlayerColorString(command->playerNumber), jass::GetPlayerName(eventOwner),
+				GetPlayerColorString(command->playerNumber), 
+				jass::GetPlayerName(eventOwner),
 				clickType,
-				GetPlayerColorString(jass::GetPlayerColor(hOwner)), jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
+				GetPlayerColorString(jass::GetPlayerColor(hOwner)), 
+				jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
 			);
 			DisplayText(buff, 18.0f);
-			if (!locVisible && prevlocVisible) {
+			if (prevlocVisible) {
 				logger->info("mhDetect::testSelection possible {0} {1} -> {2} {3} {4}", 
-					command->playerNumber, jass::GetPlayerName(eventOwner), jass::GetPlayerColor(hOwner), jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
+					command->playerNumber, 
+					jass::GetPlayerName(eventOwner), 
+					jass::GetPlayerColor(hOwner), 
+					jass::GetUnitName(hUnit), 
+					jass::GetPlayerName(hOwner)
 				);
 			}
 			else {
 				logger->info("mhDetect::testSelection {0} {1} -> {2} {3} {4}",
-					command->playerNumber, jass::GetPlayerName(eventOwner), jass::GetPlayerColor(hOwner), jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
+					command->playerNumber, 
+					jass::GetPlayerName(eventOwner), 
+					jass::GetPlayerColor(hOwner), 
+					jass::GetUnitName(hUnit), 
+					jass::GetPlayerName(hOwner)
 				);
 			}
 		}
@@ -102,10 +109,15 @@ void __fastcall mhDetect::HookOnDispatchSelectableSelectionModify(SelectableSele
 				if (!jass::IsVisibleToPlayer(&itemX, &itemY, eventOwner)) {
 					jass::PingMinimapEx(&itemX, &itemY, &duration, 255, 0, 0, false);
 					_snprintf_s(buff, _TRUNCATE, "%s%s|r |cffFF0000->|r %s",
-						GetPlayerColorString(command->playerNumber), jass::GetPlayerName(eventOwner), jass::GetItemName(hItem)
+						GetPlayerColorString(command->playerNumber), 
+						jass::GetPlayerName(eventOwner), 
+						jass::GetItemName(hItem)
 					);
 					DisplayText(buff, 18.0f);
-					logger->info("mhDetect::OnDispatchSelectableSelectionModify {0} {1} -> {2}", command->playerNumber, jass::GetPlayerName(eventOwner), jass::GetItemName(hItem));
+					logger->info("mhDetect::OnDispatchSelectableSelectionModify {0} {1} -> {2}", 
+						command->playerNumber, 
+						jass::GetPlayerName(eventOwner), 
+						jass::GetItemName(hItem));
 				}
 			}
 		}
@@ -124,19 +136,32 @@ void mhDetect::DetectImpossibleOrder(ddd* d, uint32_t targetObject, unsigned int
 
 		if (itemName && !jass::IsVisibleToPlayer(&d->x, &d->y, eventOwner)) {
 			_snprintf_s(buff, _TRUNCATE, "%s%s|r [%s] |cffFF0000->|r %s",
-				GetPlayerColorString(d->playerId), jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), itemName
+				GetPlayerColorString(d->playerId), 
+				jass::GetPlayerName(eventOwner), 
+				ConvertOrderId(d->orderId), 
+				itemName
 			);
 			DisplayText(buff, 18.0f);
 			jass::PingMinimapEx(&d->x, &d->y, &duration, 255, 0, 0, false);
-			logger->info("mhDetect::DetectImpossibleOrder {0} {1} {2} {3}", d->playerId, jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), itemName);
+			logger->info("mhDetect::DetectImpossibleOrder {0} {1} {2} {3}", 
+				d->playerId, 
+				jass::GetPlayerName(eventOwner), 
+				ConvertOrderId(d->orderId), itemName);
 		}
 		else if (unitName = jass::GetUnitName(targetObject), unitName && !jass::IsUnitVisible(targetObject, eventOwner)) {
 			_snprintf_s(buff, _TRUNCATE, "%s%s|r [%s] |cffFF0000->|r %s",
-				GetPlayerColorString(d->playerId), jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), unitName
+				GetPlayerColorString(d->playerId), 
+				jass::GetPlayerName(eventOwner), 
+				ConvertOrderId(d->orderId), 
+				unitName
 			);
 			DisplayText(buff, 18.0f);
 			jass::PingMinimapEx(&d->x, &d->y, &duration, 255, 0, 0, false);
-			logger->info("mhDetect::DetectImpossibleOrder {0} {1} {2} {3}", d->playerId, jass::GetPlayerName(eventOwner), ConvertOrderId(d->orderId), unitName);
+			logger->info("mhDetect::DetectImpossibleOrder {0} {1} {2} {3}",
+				d->playerId, 
+				jass::GetPlayerName(eventOwner), 
+				ConvertOrderId(d->orderId), 
+				unitName);
 		}
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {
@@ -147,14 +172,14 @@ void mhDetect::DetectImpossibleOrder(ddd* d, uint32_t targetObject, unsigned int
 void ImminentDanger(const void* const triggerUnit, const unsigned int eventOwner, const unsigned int hTargetObject,const ddd* d) {
 	std::string triggerUnitName(jass::GetUnitNameAddr((unsigned int)triggerUnit));
 	if (d->orderId == 0xd0278 && triggerUnitName.find("\xE8\xA3\x82\xE9\xAD\x82\xE4\xBA\xBA") != std::string::npos) {
-		_snprintf_s(buff, _TRUNCATE, "|cffFF0000 %s [\xE6\x9A\x97\xE5\xBD\xB1\xE5\x86\xB2\xE5\x88\xBA] %s|r",
-			jass::GetPlayerName(eventOwner), jass::GetUnitName(hTargetObject)
+		_snprintf_s(buff, _TRUNCATE, "|cffFF0000[\xE6\x9A\x97\xE5\xBD\xB1\xE5\x86\xB2\xE5\x88\xBA] %s|r",
+			jass::GetUnitName(hTargetObject)
 		);
 		DisplayText(buff, 18.0f);
 	}
 	else if (d->orderId == 852185 && triggerUnitName.find("\xE5\xB7\xA8\xE7\x89\x99\xE6\xB5\xB7\xE6\xB0\x91") != std::string::npos) {
-		_snprintf_s(buff, _TRUNCATE, "|cffFF0000 %s [\xE9\x9B\xAA\xE7\x90\x83] %s|r",
-			jass::GetPlayerName(eventOwner), jass::GetUnitName(hTargetObject)
+		_snprintf_s(buff, _TRUNCATE, "|cffFF0000[\xE9\x9B\xAA\xE7\x90\x83] %s|r",
+			jass::GetUnitName(hTargetObject)
 		);
 		DisplayText(buff, 18.0f);
 	}

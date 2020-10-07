@@ -277,7 +277,7 @@ void DisplayChatMessage(const char* msg, float duration, unsigned int PlayerSlot
 			MOV ECX, GameGlobalUI
 			CALL DisplayPlayerChatMessageCall
 		}
-	}	
+	}
 }
 
 bool PostChatMessage(const char* msg, float duration, unsigned int PlayerSlot, unsigned int chattype) {

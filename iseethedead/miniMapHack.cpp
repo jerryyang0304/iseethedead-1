@@ -1,7 +1,4 @@
 /*
-	无法精确的找到大地图转换小地图的方法
-	暂时（永久）停用
-
 	+3BD740 updateMiniMap
 */
 #include "pch.h"
@@ -14,13 +11,13 @@ inline float GetUnitY(void* unit) {
 	return *(float*)((unsigned int)unit + 0x288);
 };
 
-static uint32_t miniMapcallback, _W3XConversion;
+static void *miniMapcallback, *_W3XConversion;
 static MiniMapHack::convert1 addrConvertCoord1;
 static MiniMapHack::convert2 addrConvertCoord2;
 MiniMapHack::MiniMapHack() {
 	miniMapBackup = (uint32_t*)new uint32_t[255][255];
-	miniMapcallback = gameDll + 0x771125;
-	_W3XConversion = gameDll + 0xBB82BC;
+	_W3XConversion = (void*)(gameDll + 0xBB82BC);
+	miniMapcallback = (void*)(gameDll + 0x771125);
 	addrConvertCoord1 = (convert1)(gameDll + 0x528B0);
 	addrConvertCoord2 = (convert2)(gameDll + 0x52F30);
 	PlantDetourCall((BYTE*)gameDll + 0x3BE4F1, (BYTE*)DetourUpdateMiniMap, 5);
@@ -156,23 +153,15 @@ void MiniMapHack::ConvertMmap(MmapLoc& loc)
 	X = max(X, minX); X = min(X, maxX);
 	Y = max(Y, minY); Y = min(Y, maxY);
 	X -= minX; Y -= minY;
-	float fX = X, fY = Y;
-	fX = fX * xMult + unk;
-	fY = fY * yMult + unk;
-	__asm
-	{
-		MOV EAX, fX
-		SHR EAX, 0xE
-		MOVZX EAX, AL
-		MOV X, EAX
-		MOV EAX, fY
-		SHR EAX, 0xE
-		MOVZX EAX, AL
-		MOV Y, EAX
-	};
+	float fx = X, fy = Y;
+	fx = fx * xMult + unk;
+	fy = fy * yMult + unk;
+	unsigned int* tmpx = (unsigned int*)&fx;
+	unsigned int* tmpy = (unsigned int*)&fy;
+	X = *tmpx >> 0xE & 0x000000ff;
+	Y = *tmpy >> 0xE & 0x000000ff;
 	X += unk2 - 2;
 	Y = 0x100 - Y - unk3 - 2;
-
 	loc.X = X;
 	loc.Y = Y;
 }
@@ -218,7 +207,6 @@ void MiniMapHack::draw_unit(void* unit, Unit& obj)
 
 void MiniMapHack::DrawPixel(int x, int y, uint32_t color)
 {
-	size_t index = 0;
 	if (x > 255 || x < 0) return;
 	if (y > (255 - unk3) || y < 0) return;
 
@@ -256,18 +244,6 @@ void MiniMapHack::Clear()
 {
 	lines.clear();
 	//restore.clear();
-}
-
-void MiniMapHack::Clean()
-{
-	for (auto iter = lines.begin(); iter != lines.end();) {
-		if (jass::IsUnitDead(iter->second.unitHandle)) {
-			lines.erase(iter++);
-		}
-		else {
-			iter++;
-		}
-	}
 }
 
 void MiniMapHack::Refresh()
@@ -328,9 +304,14 @@ void MiniMapHack::CalMiniMapLoc(const Loc& main, Loc& mini) {
 
 void MiniMapHack::DrawMiniMap()
 {
-	Clean();
-	for (auto iter = lines.begin(); iter != lines.end(); iter++) {
-		draw_line(iter->first, iter->second);
+	for (auto iter = lines.begin(); iter != lines.end();) {
+		if (jass::IsUnitDead(iter->second.unitHandle)) {
+			lines.erase(iter++);
+		}
+		else {
+			draw_line(iter->first, iter->second);
+			iter++;
+		}
 	}
 	/*for (auto iter = units.begin(); iter != units.end(); iter++) {
 		draw_unit(iter->first, iter->second);
@@ -367,20 +348,13 @@ void MiniMapHack::RestorMiniMap()
 extern MiniMapHack* aMiniMapHack;
 void MiniMapHack::DetourUpdateMiniMap()
 {
-	static bool f = true;
 	__try {
 		_asm {
-			push ebx
-			push ecx
+			call DWORD PTR DS : [miniMapcallback]
 		}
 		if (aMiniMapHack) {
 			aMiniMapHack->Refresh();
 			aMiniMapHack->DrawMiniMap();
-		}
-		_asm {
-			pop ecx
-			pop ebx
-			call DWORD PTR DS : [miniMapcallback]
 		}
 	}
 	__except (filter(GetExceptionCode(), GetExceptionInformation())) {

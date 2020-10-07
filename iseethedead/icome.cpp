@@ -30,19 +30,12 @@ inline void icome::updateTag() {
 static bool firstBoot = true;
 
 bool icome::firstBOOT() {
-	if (PostChatMessage("|cFFffff33[Author] \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r") &&
-		PostChatMessage("|cFFffff33[In memory of] the machine and samaritan|r") &&
-		PostChatMessage("|cFFffff33[We] are being watched|r")) {
-		DisplayChatMessage("|cFFffff33[Author] \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r");
-		DisplayChatMessage("|cFFffff33[In memory of] the machine and samaritan|r");
-		DisplayChatMessage("|cFFffff33[We] are being watched|r");
-		firstBoot = false;
-		traverseUnits();
-		return true;
-	}
-	else {
-		return false;
-	}
+	firstBoot = false;
+	traverseUnits();
+	DisplayChatMessage("|cFFffff33[Author] \xE4\xBA\x8C\xE6\x9C\x88\xE9\x9C\x9C\xE5\x8D\x8E|r");
+	DisplayChatMessage("|cFFffff33[In memory of] the machine and samaritan|r");
+	DisplayChatMessage("|cFFffff33[We] are being watched|r");
+	return true;
 }
 
 void icome::ToggleMaphack(bool enable) {

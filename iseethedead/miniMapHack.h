@@ -33,7 +33,6 @@ private:
 	std::unordered_map<void*, UnitLine> lines;
 	std::unordered_map<void*, Unit> units;
 	std::unordered_map<int, bool> restore;
-	const int const2 = 2;
 	uint32_t* miniMapBackup = nullptr;
 	uint32_t* gameMiniMap = nullptr;
 	float xMult = 0, yMult = 0, unk = 0;
@@ -48,12 +47,11 @@ private:
 	void ConvertMmap(MmapLoc& loc);
 	void Refresh();
 	void CalMiniMapLoc(const Loc& main, Loc& mini);
-	void Clean();
 	void RestorMiniMap();
 	static signed int* ConvertCoord1(signed int* a1, signed int* a2, DWORD* a3);
 	static uint32_t ConvertCoord2(int*);
-	static void DetourUpdateMiniMap();
 public:
+	static void DetourUpdateMiniMap();
 	typedef void(__fastcall* convert1)(float*, float*, uint32_t);
 	typedef uint32_t(__fastcall* convert2)(int*);
 	MiniMapHack();
