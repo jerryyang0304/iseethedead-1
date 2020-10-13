@@ -17,6 +17,7 @@ int filter(unsigned int code, struct _EXCEPTION_POINTERS* ep)
 	//};
 	return EXCEPTION_EXECUTE_HANDLER;
 }
+
 unsigned int WarcraftVersion()
 {
 	DWORD dwHandle;

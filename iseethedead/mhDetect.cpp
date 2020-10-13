@@ -38,10 +38,12 @@ void mhDetect::testSelection(unsigned int objId1, unsigned int objId2, UnitSelec
 			float prevX = unitX - ms * cos(unitFacing);
 			float prevY = unitY - ms * sin(unitFacing);
 			bool prevlocVisible = jass::IsVisibleToPlayer(&prevX, &prevY, eventOwner);
+			bool locVisible = jass::IsVisibleToPlayer(&unitX, &unitY, eventOwner);
+			jass::PingMinimapEx(&unitX, &unitY, &duration, 255, 0, 0, true);
 
 			jass::PingMinimapEx(&unitX, &unitY, &duration, 255, 0, 0, true);
 			char* clickType = (char*)"|cffFF0000";
-			if (prevlocVisible) {
+			if (!locVisible && prevlocVisible) {
 				clickType = (char*)"|cffFFFF00";
 			}
 
@@ -50,11 +52,12 @@ void mhDetect::testSelection(unsigned int objId1, unsigned int objId2, UnitSelec
 				jass::GetPlayerName(eventOwner),
 				clickType,
 				GetPlayerColorString(jass::GetPlayerColor(hOwner)), 
-				jass::GetUnitName(hUnit), jass::GetPlayerName(hOwner)
+				jass::GetUnitName(hUnit), 
+				jass::GetPlayerName(hOwner)
 			);
 			DisplayText(buff, 18.0f);
-			if (prevlocVisible) {
-				logger->info("mhDetect::testSelection possible {0} {1} -> {2} {3} {4}", 
+			if (!locVisible && prevlocVisible) {
+				logger->info("mhDetect::testSelection possible {0} {1} -> {2} {3} {4}",
 					command->playerNumber, 
 					jass::GetPlayerName(eventOwner), 
 					jass::GetPlayerColor(hOwner), 
@@ -198,12 +201,12 @@ void __fastcall mhDetect::HookOnPlayerOrder(void* triggerUnit, ddd* d, unsigned 
 
 			if (targetObject) {
 				ImminentDanger(triggerUnit, eventOwner, hTargetObject, d);
-				if (jass::GetItemName(hTargetObject)) {
+				/*if (jass::GetItemName(hTargetObject)) {
 					aMiniMapHack->addLine(triggerUnit, jass::GetItemX(hTargetObject).fl, jass::GetItemY(hTargetObject).fl, GetPlayerColorHEX(d->playerId));
 				}
 				else {
 					aMiniMapHack->addLine(triggerUnit, targetObject, GetPlayerColorHEX(d->playerId));
-				}
+				}*/
 			}
 			else {
 				switch (d->orderId)
@@ -235,10 +238,8 @@ void mhDetect::init()
 	if (error == NO_ERROR)
 	{
 		DetourUpdateThread(GetCurrentThread());
-#ifndef LIMITED
 		DetourAttach(&(PVOID&)aOnDispatchUnitSelectionModify, HookOnDispatchUnitSelectionModify);
 		DetourAttach(&(PVOID&)aOnDispatchSelectableSelectionModify, HookOnDispatchSelectableSelectionModify);
-#endif // !LIMITED
 		DetourAttach(&(PVOID&)aOnPlayerOrder, HookOnPlayerOrder);
 		DetourTransactionCommit();
 	}	

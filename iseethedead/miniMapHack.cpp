@@ -160,8 +160,8 @@ void MiniMapHack::ConvertMmap(MmapLoc& loc)
 	unsigned int* tmpy = (unsigned int*)&fy;
 	X = *tmpx >> 0xE & 0x000000ff;
 	Y = *tmpy >> 0xE & 0x000000ff;
-	X += unk2 - 2;
-	Y = 0x100 - Y - unk3 - 2;
+	X += unk2;
+	Y = 0x100 - Y - unk3;
 	loc.X = X;
 	loc.Y = Y;
 }

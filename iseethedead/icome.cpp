@@ -7,7 +7,9 @@
 #include "memedit.h"
 #include "mhDetect.h"
 #include "safeclick.h"
+#include "antiExploit.h"
 #include <random>
+
 HANDLE DrawMiniMapThread = 0;
 unsigned int timerNO;
 gamePlayerInfo* aPlayerInfo = new gamePlayerInfo();
@@ -105,11 +107,10 @@ void icome::icome()
 	jass::init();
 	aMiniMapHack = new MiniMapHack();
 	memedit::applyPatch();
-#ifndef LIMITED
 	memedit::applyDetour();
 	mhDetect::init();
 	safeClick::init();
-#endif
+	antiExploit::init();
 	unitTrack::hook();
 	std::mt19937_64 g(GetTickCount64());
 	//5fps is enough
